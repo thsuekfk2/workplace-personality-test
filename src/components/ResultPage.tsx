@@ -21,7 +21,17 @@ import {
   BookIcon,
   HeartIcon,
   WarningIcon,
+  KakaoIcon,
+  LinkIcon,
+  CameraIcon,
 } from "@/components/ModernIcons";
+import {
+  shareToKakao,
+  copyToClipboard,
+  captureResult,
+  showImageInNewTab,
+  loadKakaoSDK,
+} from "@/lib/shareUtils";
 
 interface ResultPageProps {
   result: TestResult;
@@ -43,6 +53,7 @@ export default function ResultPage({
 }: ResultPageProps) {
   const { personalityType, scores } = result;
   const [stats, setStats] = useState(getStats());
+  const [shareMessage, setShareMessage] = useState("");
   const [startTime] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("testStartTime");
@@ -59,24 +70,54 @@ export default function ResultPage({
     if (typeof window !== "undefined") {
       localStorage.removeItem("testStartTime");
     }
+
+    // 카카오 SDK 로드
+    loadKakaoSDK().catch(console.error);
   }, [personalityType.id, startTime]);
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "직장인 유형 테스트 결과",
-          text: `나의 직장인 유형은 "${personalityType.name}"입니다! 테스트해보세요.`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log("공유 실패:", error);
-      }
+  const handleKakaoShare = () => {
+    shareToKakao(result);
+    setShareMessage("카카오톡으로 공유했습니다!");
+    setTimeout(() => setShareMessage(""), 3000);
+  };
+
+  const handleCopyLink = async () => {
+    const success = await copyToClipboard(result);
+    if (success) {
+      setShareMessage("링크가 클립보드에 복사되었습니다!");
     } else {
-      const text = `나의 직장인 유형은 "${personalityType.name}"입니다! 테스트해보세요: ${window.location.href}`;
-      await navigator.clipboard.writeText(text);
-      alert("결과가 클립보드에 복사되었습니다!");
+      setShareMessage("링크 복사에 실패했습니다.");
     }
+    setTimeout(() => setShareMessage(""), 3000);
+  };
+
+  const handleCapture = async () => {
+    try {
+      setShareMessage("이미지를 생성 중입니다...");
+
+      const success = await captureResult(
+        "result-content",
+        `${personalityType.name}-결과.png`
+      );
+
+      if (success) {
+        setShareMessage("결과가 이미지로 저장되었습니다!");
+      } else {
+        // 실패 시 새 탭에서 보기 시도
+        const tabSuccess = await showImageInNewTab("result-content");
+        if (tabSuccess) {
+          setShareMessage(
+            "새 탭에서 이미지를 확인하세요! 우클릭하여 저장할 수 있습니다."
+          );
+        } else {
+          setShareMessage("이미지 저장에 실패했습니다.");
+        }
+      }
+    } catch (error) {
+      console.error("캡쳐 에러:", error);
+      setShareMessage("이미지 저장 중 오류가 발생했습니다.");
+    }
+    setTimeout(() => setShareMessage(""), 3000);
   };
 
   const maxScore = Math.max(...Object.values(scores));
@@ -105,199 +146,257 @@ export default function ResultPage({
         transition={{ duration: 0.6 }}
         className="w-full max-w-2xl mx-auto"
       >
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
-          className="text-center mb-8"
-        >
-          <div className="mb-6 flex justify-center">
-            <Character type={personalityType.character} size={160} />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-            {personalityType.name}
-          </h1>
-          <p className="text-lg text-gray-600 mb-6">
-            {personalityType.description}
-          </p>
-        </motion.div>
+        {shareMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg"
+          >
+            {shareMessage}
+          </motion.div>
+        )}
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4, duration: 0.5 }}
-          className="modern-card rounded-2xl p-6 md:p-8 mb-6"
-          style={{ borderColor: personalityType.color + "30" }}
-        >
-          <div className="space-y-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <SparklesIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">주요 특징</h3>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {personalityType.traits.map((trait, index) => (
-                  <motion.span
-                    key={trait}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8 + index * 0.1 }}
-                    className="px-4 py-2 rounded-full text-sm font-medium text-white shadow-lg"
-                    style={{ backgroundColor: personalityType.color }}
-                  >
-                    {trait}
-                  </motion.span>
-                ))}
-              </div>
+        <div id="result-content" className="capture-area">
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="text-center mb-8"
+          >
+            <div className="mb-6 flex justify-center">
+              <Character type={personalityType.character} size={160} />
             </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+              {personalityType.name}
+            </h1>
+            <p className="text-lg text-gray-600 mb-6">
+              {personalityType.description}
+            </p>
+          </motion.div>
 
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <BookIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">
-                  내가 어떤 유형인지
-                </h3>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="modern-card rounded-2xl p-6 md:p-8 mb-6"
+            style={{ borderColor: personalityType.color + "30" }}
+          >
+            <div className="space-y-8">
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <SparklesIcon size={20} color="#6B7280" />
+                  <h3 className="font-semibold text-gray-800">주요 특징</h3>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {personalityType.traits.map((trait, index) => (
+                    <motion.span
+                      key={trait}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.8 + index * 0.1 }}
+                      className="px-4 py-2 rounded-full text-sm font-medium text-white shadow-lg"
+                      style={{ backgroundColor: personalityType.color }}
+                    >
+                      {trait}
+                    </motion.span>
+                  ))}
+                </div>
               </div>
-              <div className="text-gray-700 leading-relaxed">
-                {personalityType.detailedDescription.map((data) => {
-                  return (
-                    <div key={data} className="mb-1">
-                      # {data}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <HeartIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">
-                  나에게 필요한 것
-                </h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {personalityType.needs.map((need, index) => (
-                  <motion.div
-                    key={need}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.2 + index * 0.1 }}
-                    className="p-4 shadow-xs rounded-lg text-center border-l-4"
-                    style={{ borderLeftColor: personalityType.color }}
-                  >
-                    <span className="text-gray-700 font-medium">{need}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <WarningIcon size={20} color="#F59E0B" />
-                <h3 className="font-semibold text-gray-800">내가 삐뚤어지면</h3>
-              </div>
-              <div className="p-4 bg-[#fffcf1] rounded-lg border-l-4 border-yellow-400">
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <BookIcon size={20} color="#6B7280" />
+                  <h3 className="font-semibold text-gray-800">
+                    내가 어떤 유형인지
+                  </h3>
+                </div>
                 <div className="text-gray-700 leading-relaxed">
-                  {personalityType.whenDistorted.map((data, i) => {
+                  {personalityType.detailedDescription.map((data) => {
                     return (
-                      <div key={i} className="mb-1">
-                        - {data}
+                      <div key={data} className="mb-1">
+                        # {data}
                       </div>
                     );
                   })}
                 </div>
               </div>
-            </div>
 
-            <div>
-              <div className="flex items-center space-x-2 mb-3">
-                <CheckIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">추천 직무</h3>
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <HeartIcon size={20} color="#6B7280" />
+                  <h3 className="font-semibold text-gray-800">
+                    나에게 필요한 것
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {personalityType.needs.map((need, index) => (
+                    <motion.div
+                      key={need}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.2 + index * 0.1 }}
+                      className="p-4 shadow-xs rounded-lg text-center border-l-4"
+                      style={{ borderLeftColor: personalityType.color }}
+                    >
+                      <span className="text-gray-700 font-medium">{need}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {personalityType.recommendedJobs.map((job, index) => (
-                  <motion.div
-                    key={job}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.8 + index * 0.1 }}
-                    className="p-4 bg-gray-50 rounded-lg text-center"
-                  >
-                    <span className="text-gray-700 font-medium">{job}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.6, duration: 0.5 }}
-          className="modern-card rounded-xl p-6 mb-6"
-        >
-          <div className="flex items-center space-x-2 mb-4">
-            <BarChartIcon size={20} color="#6B7280" />
-            <h3 className="font-semibold text-gray-800">다른 유형과의 비교</h3>
-          </div>
-          <div className="space-y-3">
-            {otherScores.map((item) => (
-              <div key={item.key} className="flex items-center">
-                <div className="w-55 text-sm text-gray-600 capitalize">
-                  {item.name}
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <WarningIcon size={20} color="#F59E0B" />
+                  <h3 className="font-semibold text-gray-800">
+                    내가 삐뚤어지면
+                  </h3>
                 </div>
-                <div className="flex-1 bg-gray-200 rounded-full h-2 mx-3">
-                  <div
-                    className="bg-gray-400 h-2 rounded-full"
-                    style={{ width: `${(item.score / maxScore) * 100}%` }}
-                  />
-                </div>
-                <div className="text-sm text-gray-600 w-8">{item.score}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {stats.totalTests > 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7, duration: 0.5 }}
-            className="modern-card rounded-xl p-6 mb-6"
-          >
-            <div className="flex items-center space-x-2 mb-4">
-              <TrendingUpIcon size={20} color="#6B7280" />
-              <h3 className="font-semibold text-gray-800">테스트 통계</h3>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
-                <div className="text-2xl font-bold text-blue-600">
-                  {stats.totalTests}
-                </div>
-                <div className="text-sm text-gray-600">총 테스트 횟수</div>
-              </div>
-              {popularType && (
-                <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center justify-center mb-6">
-                    <Character type={popularType.character} size={100} />
+                <div className="p-4 bg-[#fffcf1] rounded-lg border-l-4 border-yellow-400">
+                  <div className="text-gray-700 leading-relaxed">
+                    {personalityType.whenDistorted.map((data, i) => {
+                      return (
+                        <div key={i} className="mb-1">
+                          - {data}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="text-sm font-bold text-green-600">
-                    {popularType.name}
-                  </div>
-                  <div className="text-xs text-gray-600">가장 많은 유형</div>
                 </div>
-              )}
-              <div className="p-3 bg-purple-50 rounded-lg flex flex-col items-center justify-center">
-                <div className="text-lg font-bold text-purple-600">
-                  {formatCompletionTime(stats.averageCompletionTime)}
+              </div>
+
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <CheckIcon size={20} color="#6B7280" />
+                  <h3 className="font-semibold text-gray-800">추천 직무</h3>
                 </div>
-                <div className="text-sm text-gray-600">평균 소요 시간</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {personalityType.recommendedJobs.map((job, index) => (
+                    <motion.div
+                      key={job}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.8 + index * 0.1 }}
+                      className="p-4 bg-gray-50 rounded-lg text-center"
+                    >
+                      <span className="text-gray-700 font-medium">{job}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </motion.div>
-        )}
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+            className="modern-card rounded-xl p-6 mb-6"
+          >
+            <div className="flex items-center space-x-2 mb-4">
+              <BarChartIcon size={20} color="#6B7280" />
+              <h3 className="font-semibold text-gray-800">
+                다른 유형과의 비교
+              </h3>
+            </div>
+            <div className="space-y-3">
+              {otherScores.map((item) => (
+                <div key={item.key} className="flex items-center">
+                  <div className="w-55 text-sm text-gray-600 capitalize">
+                    {item.name}
+                  </div>
+                  <div className="flex-1 bg-gray-200 rounded-full h-2 mx-3">
+                    <div
+                      className="bg-gray-400 h-2 rounded-full"
+                      style={{ width: `${(item.score / maxScore) * 100}%` }}
+                    />
+                  </div>
+                  <div className="text-sm text-gray-600 w-8">{item.score}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {stats.totalTests > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="modern-card rounded-xl p-6 mb-6"
+            >
+              <div className="flex items-center space-x-2 mb-4">
+                <TrendingUpIcon size={20} color="#6B7280" />
+                <h3 className="font-semibold text-gray-800">테스트 통계</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {stats.totalTests}
+                  </div>
+                  <div className="text-sm text-gray-600">총 테스트 횟수</div>
+                </div>
+                {popularType && (
+                  <div className="p-3 bg-green-50 rounded-lg">
+                    <div className="flex items-center justify-center mb-6">
+                      <Character type={popularType.character} size={100} />
+                    </div>
+                    <div className="text-sm font-bold text-green-600">
+                      {popularType.name}
+                    </div>
+                    <div className="text-sm text-gray-600">가장 많은 유형</div>
+                  </div>
+                )}
+                <div className="p-3 bg-purple-50 rounded-lg flex flex-col items-center justify-center">
+                  <div className="text-lg font-bold text-purple-600">
+                    {formatCompletionTime(stats.averageCompletionTime)}
+                  </div>
+                  <div className="text-sm text-gray-600">평균 소요 시간</div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+
+        {/* 공유 버튼 섹션 */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8, duration: 0.5 }}
+          className="my-10"
+        >
+          <div className="flex items-center justify-center space-x-2 mt-10 mb-4">
+            <ShareIcon size={20} color="#6B7280" />
+            <h3 className="font-semibold text-gray-800">결과 공유하기</h3>
+          </div>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleKakaoShare}
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-800 rounded-full font-semibold transition-colors"
+            >
+              <KakaoIcon size={20} />
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCopyLink}
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold transition-colors"
+            >
+              <LinkIcon size={20} color="white" />
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleCapture}
+              className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-full font-semibold transition-colors"
+            >
+              <CameraIcon size={20} color="white" />
+            </motion.button>
+          </div>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -305,16 +404,6 @@ export default function ResultPage({
           transition={{ delay: 0.8, duration: 0.5 }}
           className="flex flex-col sm:flex-row gap-4 justify-center"
         >
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleShare}
-            className="modern-button modern-button-success px-8 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
-          >
-            <ShareIcon size={20} color="white" />
-            <span>결과 공유하기</span>
-          </motion.button>
-
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
