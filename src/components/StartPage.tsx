@@ -2,11 +2,7 @@
 
 import { motion } from "framer-motion";
 import Character from "@/components/Characters";
-import {
-  ClockIcon,
-  ListIcon,
-  SparklesIcon,
-} from "@/components/ModernIcons";
+import { ClockIcon, ListIcon } from "@/components/ModernIcons";
 
 interface StartPageProps {
   onStartTest: () => void;
@@ -27,7 +23,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="mb-10"
         >
-          <h1 className="text-xl md:text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-4">
             직장인 유형 테스트
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 leading-relaxed">
@@ -40,7 +36,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="modern-card rounded-2xl p-6 md:p-8"
         >
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-4 md:grid-cols-4 gap-6 mb-8">
             <motion.div
               className="text-center"
               initial={{ opacity: 0, y: 20 }}
@@ -48,9 +44,8 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.6 }}
             >
               <div className="mb-3 flex justify-center">
-                <Character type="advisor" size={60} />
+                <Character type="extrovert" size={100} />
               </div>
-              <p className="text-sm text-gray-600">조언가</p>
             </motion.div>
             <motion.div
               className="text-center"
@@ -59,9 +54,8 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.7 }}
             >
               <div className="mb-3 flex justify-center">
-                <Character type="peacemaker" size={60} />
+                <Character type="introvert" size={100} />
               </div>
-              <p className="text-sm text-gray-600">평화주의자</p>
             </motion.div>
             <motion.div
               className="text-center"
@@ -70,9 +64,8 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.8 }}
             >
               <div className="mb-3 flex justify-center">
-                <Character type="leader" size={60} />
+                <Character type="emotion" size={100} />
               </div>
-              <p className="text-sm text-gray-600">행동대장</p>
             </motion.div>
             <motion.div
               className="text-center"
@@ -81,9 +74,8 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.9 }}
             >
               <div className="mb-3 flex justify-center">
-                <Character type="optimist" size={60} />
+                <Character type="thought" size={100} />
               </div>
-              <p className="text-sm text-gray-600">배짱이</p>
             </motion.div>
           </div>
 
@@ -104,7 +96,6 @@ export default function StartPage({ onStartTest }: StartPageProps) {
             onClick={onStartTest}
             className="w-full modern-button modern-button-primary py-4 px-8 rounded-xl text-lg font-semibold flex items-center justify-center space-x-2"
           >
-            <SparklesIcon size={20} color="white" />
             <span>테스트 시작하기</span>
           </motion.button>
         </motion.div>

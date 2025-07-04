@@ -28,6 +28,13 @@ interface ResultPageProps {
   onRestart: () => void;
 }
 
+export const personalityTypeNames: { [key: string]: string } = {
+  extrovert: "진취적이며 자신감 넘치는 행동대장",
+  introvert: "낙천적으로 사교적인 배짱이",
+  emotion: "솔직한 조언가",
+  thought: "배려가 넘치는 따뜻한 평화주의자",
+};
+
 export default function ResultPage({ result, onRestart }: ResultPageProps) {
   const { personalityType, scores } = result;
   const [stats, setStats] = useState(getStats());
@@ -68,11 +75,18 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
   };
 
   const maxScore = Math.max(...Object.values(scores));
-  const otherScores = Object.entries(scores)
-    .filter(([key]) => key !== personalityType.id)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3);
 
+  const otherScores = Object.entries(scores)
+    .map(([key, score]) => ({
+      key: key,
+      name: personalityTypeNames[key] || key,
+      score: score,
+    }))
+    .filter((item) => item.key !== personalityType.id) // 현재 주 성격 타입 제외
+    .sort((a, b) => b.score - a.score) // 점수 높은 순으로 정렬
+    .slice(0, 3); // 상위 3개만
+
+  console.log("Object.entries(scores)", Object.entries(scores));
   const popularTypeId = getMostPopularType();
   const popularType = popularTypeId
     ? personalityTypes.find((t) => t.id === popularTypeId)
@@ -110,24 +124,6 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
           className="modern-card rounded-2xl p-6 md:p-8 mb-6"
           style={{ borderColor: personalityType.color + "30" }}
         >
-          <div className="mb-6">
-            <div
-              className="w-full h-4 rounded-full mb-2"
-              style={{ backgroundColor: personalityType.color + "20" }}
-            >
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${(maxScore / 30) * 100}%` }}
-                transition={{ delay: 0.6, duration: 1 }}
-                className="h-full rounded-full"
-                style={{ backgroundColor: personalityType.color }}
-              />
-            </div>
-            <p className="text-sm text-gray-600 text-center">
-              매치도: {Math.round((maxScore / 30) * 100)}%
-            </p>
-          </div>
-
           <div className="space-y-8">
             <div>
               <div className="flex items-center space-x-2 mb-3">
@@ -153,17 +149,27 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
             <div>
               <div className="flex items-center space-x-2 mb-3">
                 <BookIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">내가 어떤 유형인지</h3>
+                <h3 className="font-semibold text-gray-800">
+                  내가 어떤 유형인지
+                </h3>
               </div>
-              <p className="text-gray-700 leading-relaxed">
-                {personalityType.detailedDescription}
-              </p>
+              <div className="text-gray-700 leading-relaxed">
+                {personalityType.detailedDescription.map((data) => {
+                  return (
+                    <div key={data} className="mb-1">
+                      # {data}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
               <div className="flex items-center space-x-2 mb-3">
                 <HeartIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">나에게 필요한 것</h3>
+                <h3 className="font-semibold text-gray-800">
+                  나에게 필요한 것
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {personalityType.needs.map((need, index) => (
@@ -172,7 +178,7 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 1.2 + index * 0.1 }}
-                    className="p-4 bg-green-50 rounded-lg text-center border-l-4"
+                    className="p-4 shadow-xs rounded-lg text-center border-l-4"
                     style={{ borderLeftColor: personalityType.color }}
                   >
                     <span className="text-gray-700 font-medium">{need}</span>
@@ -186,10 +192,16 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
                 <WarningIcon size={20} color="#F59E0B" />
                 <h3 className="font-semibold text-gray-800">내가 삐뚤어지면</h3>
               </div>
-              <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
-                <p className="text-gray-700 leading-relaxed">
-                  {personalityType.whenDistorted}
-                </p>
+              <div className="p-4 bg-[#fffcf1] rounded-lg border-l-4 border-yellow-400">
+                <div className="text-gray-700 leading-relaxed">
+                  {personalityType.whenDistorted.map((data, i) => {
+                    return (
+                      <div key={i} className="mb-1">
+                        - {data}
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
@@ -226,18 +238,18 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
             <h3 className="font-semibold text-gray-800">다른 유형과의 비교</h3>
           </div>
           <div className="space-y-3">
-            {otherScores.map(([type, score]) => (
-              <div key={type} className="flex items-center">
-                <div className="w-20 text-sm text-gray-600 capitalize">
-                  {type}
+            {otherScores.map((item) => (
+              <div key={item.key} className="flex items-center">
+                <div className="w-55 text-sm text-gray-600 capitalize">
+                  {item.name}
                 </div>
                 <div className="flex-1 bg-gray-200 rounded-full h-2 mx-3">
                   <div
                     className="bg-gray-400 h-2 rounded-full"
-                    style={{ width: `${(score / maxScore) * 100}%` }}
+                    style={{ width: `${(item.score / maxScore) * 100}%` }}
                   />
                 </div>
-                <div className="text-sm text-gray-600 w-8">{score}</div>
+                <div className="text-sm text-gray-600 w-8">{item.score}</div>
               </div>
             ))}
           </div>
@@ -255,7 +267,7 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
               <h3 className="font-semibold text-gray-800">테스트 통계</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-              <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
                 <div className="text-2xl font-bold text-blue-600">
                   {stats.totalTests}
                 </div>
@@ -263,11 +275,8 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
               </div>
               {popularType && (
                 <div className="p-3 bg-green-50 rounded-lg">
-                  <div className="flex items-center justify-center mb-2">
-                    <Character
-                      type={popularType.character}
-                      size={40}
-                    />
+                  <div className="flex items-center justify-center mb-6">
+                    <Character type={popularType.character} size={100} />
                   </div>
                   <div className="text-sm font-bold text-green-600">
                     {popularType.name}
@@ -275,7 +284,7 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
                   <div className="text-xs text-gray-600">가장 많은 유형</div>
                 </div>
               )}
-              <div className="p-3 bg-purple-50 rounded-lg">
+              <div className="p-3 bg-purple-50 rounded-lg flex flex-col items-center justify-center">
                 <div className="text-lg font-bold text-purple-600">
                   {formatCompletionTime(stats.averageCompletionTime)}
                 </div>
