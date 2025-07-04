@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Component, ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { Component, ReactNode } from "react";
+import { motion } from "motion/react";
 
 interface Props {
   children: ReactNode;

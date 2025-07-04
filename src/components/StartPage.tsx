@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import Character from "@/components/Characters";
 import { ClockIcon, ListIcon } from "@/components/ModernIcons";
 

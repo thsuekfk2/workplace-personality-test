@@ -1,6 +1,6 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { TestState, TestResult } from "@/lib/types";
 import { questions } from "@/lib/data";
 import { calculateResult, saveTestProgress } from "@/lib/testLogic";
