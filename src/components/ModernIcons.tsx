@@ -114,20 +114,6 @@ export const RefreshIcon = ({ size = 24, className = "", color = "#6B7280" }: Ic
   </svg>
 );
 
-export const ArrowLeftIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
-  <svg 
-    width={size} 
-    height={size} 
-    viewBox="0 0 24 24" 
-    fill="none" 
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <line x1="19" y1="12" x2="5" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-    <polyline points="12,19 5,12 12,5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
-
 export const BarChartIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
   <svg 
     width={size} 
@@ -224,5 +210,45 @@ export const WarningIcon = ({ size = 24, className = "", color = "#6B7280" }: Ic
     <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <line x1="12" y1="9" x2="12" y2="13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     <circle cx="12" cy="17" r="1" fill={color}/>
+  </svg>
+);
+
+export const ChevronDownIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <polyline points="6,9 12,15 18,9" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const ChevronUpIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <polyline points="18,15 12,9 6,15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const ArrowLeftIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <line x1="19" y1="12" x2="5" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <polyline points="12,19 5,12 12,5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );

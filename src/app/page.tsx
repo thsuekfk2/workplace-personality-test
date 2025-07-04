@@ -5,11 +5,12 @@ import StartPage from '@/components/StartPage';
 import IntroPage from '@/components/IntroPage';
 import TestPage from '@/components/TestPage';
 import ResultPage from '@/components/ResultPage';
+import AllResultsPage from '@/components/AllResultsPage';
 import { TestState, TestResult } from '@/lib/types';
 import { loadTestProgress, clearTestProgress } from '@/lib/testLogic';
 
 export default function Home() {
-  const [currentPage, setCurrentPage] = useState<'start' | 'intro' | 'test' | 'result'>('start');
+  const [currentPage, setCurrentPage] = useState<'start' | 'intro' | 'test' | 'result' | 'allResults'>('start');
   const [testState, setTestState] = useState<TestState>({
     currentQuestion: 0,
     answers: [],
@@ -55,6 +56,14 @@ export default function Home() {
     setCurrentPage('start');
   };
 
+  const handleShowAllResults = () => {
+    setCurrentPage('allResults');
+  };
+
+  const handleBackToResult = () => {
+    setCurrentPage('result');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {currentPage === 'start' && (
@@ -74,7 +83,11 @@ export default function Home() {
         <ResultPage 
           result={testState.result}
           onRestart={handleRestartTest}
+          onShowAllResults={handleShowAllResults}
         />
+      )}
+      {currentPage === 'allResults' && (
+        <AllResultsPage onBack={handleBackToResult} />
       )}
     </div>
   );

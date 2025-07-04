@@ -26,6 +26,7 @@ import {
 interface ResultPageProps {
   result: TestResult;
   onRestart: () => void;
+  onShowAllResults: () => void;
 }
 
 export const personalityTypeNames: { [key: string]: string } = {
@@ -35,7 +36,11 @@ export const personalityTypeNames: { [key: string]: string } = {
   thought: "배려가 넘치는 따뜻한 평화주의자",
 };
 
-export default function ResultPage({ result, onRestart }: ResultPageProps) {
+export default function ResultPage({
+  result,
+  onRestart,
+  onShowAllResults,
+}: ResultPageProps) {
   const { personalityType, scores } = result;
   const [stats, setStats] = useState(getStats());
   const [startTime] = useState(() => {
@@ -308,6 +313,16 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
           >
             <ShareIcon size={20} color="white" />
             <span>결과 공유하기</span>
+          </motion.button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={onShowAllResults}
+            className="modern-button modern-button-primary px-8 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
+          >
+            <SparklesIcon size={20} color="white" />
+            <span>모든 결과 보기</span>
           </motion.button>
 
           <motion.button
