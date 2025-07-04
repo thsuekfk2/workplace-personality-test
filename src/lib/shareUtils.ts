@@ -4,6 +4,7 @@ import { toPng } from "html-to-image";
 // 카카오톡 공유 기능
 export const shareToKakao = (result: TestResult) => {
   const { personalityType } = result;
+  const shareUrl = `${window.location.origin}/result/${personalityType.id}`;
 
   if (typeof window !== "undefined" && window.Kakao) {
     window.Kakao.Share.sendDefault({
@@ -11,14 +12,10 @@ export const shareToKakao = (result: TestResult) => {
       content: {
         title: "직장인 성격 유형 테스트 결과",
         description: `나는 "${personalityType.name}"입니다! 🎯\n\n${personalityType.description}\n\n당신의 직장인 유형도 알아보세요!`,
-        imageUrl:
-          window.location.origin +
-          "/images/" +
-          encodeURIComponent(personalityType.name) +
-          ".png",
+        imageUrl: `${window.location.origin}/api/og?type=${personalityType.id}`,
         link: {
-          mobileWebUrl: window.location.href,
-          webUrl: window.location.href,
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
         },
       },
       buttons: [
@@ -39,6 +36,7 @@ export const shareToKakao = (result: TestResult) => {
 // 링크 복사 기능
 export const copyToClipboard = async (result: TestResult) => {
   const { personalityType } = result;
+  const shareUrl = `${window.location.origin}/result/${personalityType.id}`;
   const shareText = `직장인 성격 유형 테스트 결과 🎯
 
 나는 "${personalityType.name}"입니다!
@@ -46,7 +44,7 @@ export const copyToClipboard = async (result: TestResult) => {
 ${personalityType.description}
 
 당신의 직장인 유형도 알아보세요!
-${window.location.origin}`;
+${shareUrl}`;
 
   try {
     if (navigator.clipboard && window.isSecureContext) {
