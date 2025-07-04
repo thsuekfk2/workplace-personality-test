@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { personalityTypes } from "@/lib/data";
 import Character from "@/components/Characters";
@@ -25,6 +25,11 @@ export default function AllResultsPage({
   onRestart,
 }: AllResultsPageProps) {
   const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set());
+
+  // 컴포넌트가 마운트될 때 스크롤을 최상단으로 이동
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   const toggleExpanded = (typeId: string) => {
     const newExpanded = new Set(expandedTypes);
