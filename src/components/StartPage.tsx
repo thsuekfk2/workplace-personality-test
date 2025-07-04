@@ -1,11 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import DisneyStyleCharacter from "@/components/DisneyStyleCharacters";
+import Character from "@/components/Characters";
 import {
   ClockIcon,
   ListIcon,
-  WorkIcon,
   SparklesIcon,
 } from "@/components/ModernIcons";
 
@@ -49,7 +48,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.6 }}
             >
               <div className="mb-3 flex justify-center">
-                <DisneyStyleCharacter type="advisor" size={60} />
+                <Character type="advisor" size={60} />
               </div>
               <p className="text-sm text-gray-600">조언가</p>
             </motion.div>
@@ -60,7 +59,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.7 }}
             >
               <div className="mb-3 flex justify-center">
-                <DisneyStyleCharacter type="peacemaker" size={60} />
+                <Character type="peacemaker" size={60} />
               </div>
               <p className="text-sm text-gray-600">평화주의자</p>
             </motion.div>
@@ -71,7 +70,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.8 }}
             >
               <div className="mb-3 flex justify-center">
-                <DisneyStyleCharacter type="leader" size={60} />
+                <Character type="leader" size={60} />
               </div>
               <p className="text-sm text-gray-600">행동대장</p>
             </motion.div>
@@ -82,7 +81,7 @@ export default function StartPage({ onStartTest }: StartPageProps) {
               transition={{ delay: 0.9 }}
             >
               <div className="mb-3 flex justify-center">
-                <DisneyStyleCharacter type="optimist" size={60} />
+                <Character type="optimist" size={60} />
               </div>
               <p className="text-sm text-gray-600">배짱이</p>
             </motion.div>

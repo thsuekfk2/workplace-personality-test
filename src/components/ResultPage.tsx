@@ -10,7 +10,7 @@ import {
   formatCompletionTime,
 } from "@/lib/analytics";
 import { personalityTypes } from "@/lib/data";
-import DisneyStyleCharacter from "@/components/DisneyStyleCharacters";
+import Character from "@/components/Characters";
 import {
   ShareIcon,
   RefreshIcon,
@@ -93,7 +93,7 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
           className="text-center mb-8"
         >
           <div className="mb-6 flex justify-center">
-            <DisneyStyleCharacter type={personalityType.character} size={160} />
+            <Character type={personalityType.character} size={160} />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
             {personalityType.name}
@@ -264,7 +264,7 @@ export default function ResultPage({ result, onRestart }: ResultPageProps) {
               {popularType && (
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center justify-center mb-2">
-                    <DisneyStyleCharacter
+                    <Character
                       type={popularType.character}
                       size={40}
                     />
