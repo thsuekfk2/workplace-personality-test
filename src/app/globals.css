@@ -240,3 +240,11 @@ button {
     padding: 12px;
   }
 }
+
+/* 캡쳐 영역 스타일 */
+.capture-area {
+  position: relative;
+  margin-top: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
