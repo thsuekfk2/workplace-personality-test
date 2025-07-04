@@ -252,3 +252,45 @@ export const ArrowLeftIcon = ({ size = 24, className = "", color = "#6B7280" }: 
     <polyline points="12,19 5,12 12,5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
   </svg>
 );
+
+export const LinkIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const CameraIcon = ({ size = 24, className = "", color = "#6B7280" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+    <circle cx="12" cy="13" r="4" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
+export const KakaoIcon = ({ size = 24, className = "" }: IconProps) => (
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M12 3C7.03 3 3 6.44 3 10.61c0 2.68 1.83 5.04 4.58 6.34l-1.06 3.84c-.09.34.34.61.62.39l4.59-3.05c.09 0 .18.01.27.01 4.97 0 9-3.44 9-7.67S16.97 3 12 3z" fill="#FEE500"/>
+    <path d="M12 3C7.03 3 3 6.44 3 10.61c0 2.68 1.83 5.04 4.58 6.34l-1.06 3.84c-.09.34.34.61.62.39l4.59-3.05c.09 0 .18.01.27.01 4.97 0 9-3.44 9-7.67S16.97 3 12 3z" fill="#3C1E1E"/>
+  </svg>
+);
