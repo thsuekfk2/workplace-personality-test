@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 직장인 유형 테스트 🏢
 
-## Getting Started
+나는 어떤 직장인일까? 10가지 질문으로 알아보는 나의 직장 성향 테스트입니다.
 
-First, run the development server:
+## 🌟 주요 기능
+
+- **8가지 직장인 유형**: 아이디어형, 실행형, 소통형, 분석형, 지원형, 리더형, 창작형, 기획형
+- **10문항 테스트**: 실제 직장 상황을 기반으로 한 질문들
+- **개인화된 결과**: 유형별 특징, 장점, 추천 직무 제공
+- **진행 상황 저장**: 로컬 스토리지를 통한 진행 상황 자동 저장
+- **결과 공유**: 소셜 미디어 및 클립보드 공유 기능
+- **통계 기능**: 테스트 횟수, 인기 유형, 평균 소요 시간
+- **반응형 디자인**: 모바일/태블릿/데스크톱 완벽 지원
+
+## 🎨 디자인 특징
+
+- **글래스모피즘**: 현대적인 투명 유리 효과
+- **부드러운 애니메이션**: Framer Motion을 활용한 자연스러운 전환
+- **한국어 폰트**: Noto Sans KR 웹폰트 적용
+- **접근성**: 키보드 내비게이션 및 스크린 리더 지원
+- **다크모드 대응**: 시스템 설정에 따른 자동 테마 전환
+
+## 🚀 시작하기
+
+### 설치 및 실행
 
 ```bash
+# 프로젝트 클론
+git clone <repository-url>
+cd workplace-personality-test
+
+# 의존성 설치
+npm install
+
+# 개발 서버 실행
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# http://localhost:3000 에서 확인
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 빌드 및 배포
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# 프로덕션 빌드
+npm run build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# 빌드된 앱 실행
+npm start
+```
 
-## Learn More
+## 🛠 기술 스택
 
-To learn more about Next.js, take a look at the following resources:
+- **Framework**: Next.js 15 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Animation**: Framer Motion
+- **Font**: Noto Sans KR (Google Fonts)
+- **State Management**: React State + Local Storage
+- **Deployment**: Vercel/Netlify 호환
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📱 페이지 구성
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **시작 페이지**: 테스트 소개 및 시작 버튼
+2. **안내 페이지**: 테스트 방법 및 주의사항
+3. **테스트 페이지**: 10문항 질문 및 진행률 표시
+4. **결과 페이지**: 유형 결과, 특징, 통계, 공유 기능
 
-## Deploy on Vercel
+## 🎯 8가지 직장인 유형
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| 유형 | 캐릭터 | 특징 | 추천 직무 |
+|------|--------|------|-----------|
+| 아이디어 뱅크형 | 💡 | 창의적, 혁신적 | 기획자, 마케터 |
+| 든든한 실행형 | ⚙️ | 체계적, 신뢰성 | PM, 운영팀 |
+| 소통 마스터형 | 🤝 | 소통능력, 협업성 | HR, 영업 |
+| 데이터 분석형 | 📊 | 분석적, 논리적 | 분석가, 재무팀 |
+| 따뜻한 지원형 | 🌟 | 배려심, 지원적 | 어시스턴트, 고객지원 |
+| 자연스러운 리더형 | 👑 | 리더십, 결정력 | 팀장, 사업개발 |
+| 창작 예술형 | 🎨 | 창의성, 예술성 | 디자이너, 콘텐츠 제작 |
+| 체계적 기획형 | 📋 | 계획성, 체계성 | 기획팀, 전략팀 |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 💡 주요 기능 상세
+
+### 로컬 스토리지 활용
+- 테스트 진행 상황 자동 저장 (24시간 유지)
+- 마지막 테스트 결과 저장
+- 전체 테스트 통계 누적
+
+### 반응형 디자인
+- 모바일: 최소 44px 터치 타겟
+- 태블릿: 최적화된 레이아웃
+- 데스크톱: 넓은 화면 활용
+
+### 접근성
+- 키보드 내비게이션 (A/B 키, 화살표 키)
+- 적절한 색상 대비
+- 스크린 리더 지원
+- 모션 감소 설정 대응
+
+## 📊 성능 최적화
+
+- **번들 크기**: 약 145KB (First Load JS)
+- **정적 생성**: 모든 페이지 정적 프리렌더링
+- **이미지 최적화**: Next.js Image 컴포넌트 활용
+- **폰트 최적화**: Google Fonts 프리로드
+
+## 🔧 개발자 가이드
+
+### 새로운 질문 추가
+```typescript
+// src/lib/data.ts에서 questions 배열에 추가
+{
+  id: 11,
+  text: "새로운 질문",
+  options: {
+    a: "선택지 A",
+    b: "선택지 B"
+  },
+  weights: {
+    a: { innovator: 3, executor: 0, ... },
+    b: { innovator: 0, executor: 3, ... }
+  }
+}
+```
+
+### 새로운 유형 추가
+```typescript
+// src/lib/data.ts에서 personalityTypes 배열에 추가
+{
+  id: 'new_type',
+  name: '새로운 유형명',
+  description: '간단한 설명',
+  traits: ['특징1', '특징2'],
+  recommendedJobs: ['직무1', '직무2'],
+  color: '#색상코드',
+  character: '🆕',
+  detailedDescription: '상세 설명'
+}
+```
+
+## 📄 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 있습니다.
+
+## 🤝 기여하기
+
+버그 리포트, 기능 제안, 풀 리퀘스트를 환영합니다!
+
+---
+
+**만든이**: Claude Code
+**버전**: 1.0.0
+**최종 업데이트**: 2025년 7월
