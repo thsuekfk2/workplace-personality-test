@@ -212,6 +212,12 @@ select:focus {
   outline-offset: 2px;
 }
 
+button {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent; /* 모바일에서 버튼 클릭 시 하이라이트 제거 */
+}
+
 /* 접근성을 위한 모션 감소 */
 @media (prefers-reduced-motion: reduce) {
   *,
