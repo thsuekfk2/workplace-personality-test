@@ -103,3 +103,9 @@ export function getLastTestResult(): TestResult | null {
   }
   return null;
 }
+
+export function clearTestResult() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("lastTestResult");
+  }
+}

@@ -7,7 +7,7 @@ import TestPage from '@/components/TestPage';
 import ResultPage from '@/components/ResultPage';
 import AllResultsPage from '@/components/AllResultsPage';
 import { TestState, TestResult } from '@/lib/types';
-import { loadTestProgress, clearTestProgress } from '@/lib/testLogic';
+import { loadTestProgress, clearTestProgress, saveTestResult, getLastTestResult, clearTestResult } from '@/lib/testLogic';
 
 export default function Home() {
   const [currentPage, setCurrentPage] = useState<'start' | 'intro' | 'test' | 'result' | 'allResults'>('start');
@@ -18,13 +18,27 @@ export default function Home() {
   });
 
   useEffect(() => {
-    const saved = loadTestProgress();
-    if (saved && saved.answers.length > 0) {
+    // 진행 중인 테스트가 있는지 확인
+    const savedProgress = loadTestProgress();
+    if (savedProgress && savedProgress.answers.length > 0) {
       setTestState(prev => ({
         ...prev,
-        currentQuestion: saved.currentQuestion,
-        answers: saved.answers
+        currentQuestion: savedProgress.currentQuestion,
+        answers: savedProgress.answers
       }));
+      return;
+    }
+
+    // 완료된 테스트 결과가 있는지 확인
+    const savedResult = getLastTestResult();
+    if (savedResult) {
+      setTestState({
+        currentQuestion: 10,
+        answers: savedResult.answers,
+        isCompleted: true,
+        result: savedResult
+      });
+      setCurrentPage('result');
     }
   }, []);
 
@@ -44,6 +58,7 @@ export default function Home() {
     }));
     setCurrentPage('result');
     clearTestProgress();
+    saveTestResult(result); // 결과를 localStorage에 저장
   };
 
   const handleRestartTest = () => {
@@ -53,6 +68,7 @@ export default function Home() {
       isCompleted: false
     });
     clearTestProgress();
+    clearTestResult(); // 저장된 결과도 삭제
     setCurrentPage('start');
   };
 
