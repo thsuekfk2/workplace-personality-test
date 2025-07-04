@@ -170,8 +170,20 @@ export default function AllResultsPage({
                               {type.needs.map((need, idx) => (
                                 <div
                                   key={idx}
-                                  className="p-3 bg-green-50 rounded-lg border-l-4"
-                                  style={{ borderLeftColor: type.color }}
+                                  className="p-3 rounded-lg border-l-4"
+                                  style={{
+                                    borderLeftColor: type.color,
+                                    backgroundColor: `rgba(${parseInt(
+                                      type.color.slice(1, 3),
+                                      16
+                                    )}, ${parseInt(
+                                      type.color.slice(3, 5),
+                                      16
+                                    )}, ${parseInt(
+                                      type.color.slice(5, 7),
+                                      16
+                                    )}, 0.15)`,
+                                  }}
                                 >
                                   <span className="text-gray-700 text-sm">
                                     {need}

@@ -236,8 +236,20 @@ export default function ResultPage({
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 1.2 + index * 0.1 }}
-                      className="p-4 shadow-xs rounded-lg text-center border-l-4"
-                      style={{ borderLeftColor: personalityType.color }}
+                      className="p-4 rounded-lg text-center border-l-4"
+                      style={{
+                        borderLeftColor: personalityType.color,
+                        backgroundColor: `rgba(${parseInt(
+                          personalityType.color.slice(1, 3),
+                          16
+                        )}, ${parseInt(
+                          personalityType.color.slice(3, 5),
+                          16
+                        )}, ${parseInt(
+                          personalityType.color.slice(5, 7),
+                          16
+                        )}, 0.15)`,
+                      }}
                     >
                       <span className="text-gray-700 font-medium">{need}</span>
                     </motion.div>
