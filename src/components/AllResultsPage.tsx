@@ -1,25 +1,29 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { personalityTypes } from '@/lib/data';
-import Character from '@/components/Characters';
-import { 
-  ChevronDownIcon, 
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { personalityTypes } from "@/lib/data";
+import Character from "@/components/Characters";
+import {
+  ChevronDownIcon,
   ChevronUpIcon,
   SparklesIcon,
   HeartIcon,
   WarningIcon,
   CheckIcon,
   BookIcon,
-  ArrowLeftIcon
-} from '@/components/ModernIcons';
+  ArrowLeftIcon,
+} from "@/components/ModernIcons";
 
 interface AllResultsPageProps {
   onBack: () => void;
+  onRestart: () => void;
 }
 
-export default function AllResultsPage({ onBack }: AllResultsPageProps) {
+export default function AllResultsPage({
+  onBack,
+  onRestart,
+}: AllResultsPageProps) {
   const [expandedTypes, setExpandedTypes] = useState<Set<string>>(new Set());
 
   const toggleExpanded = (typeId: string) => {
@@ -48,7 +52,7 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
             <ArrowLeftIcon size={20} />
             <span>결과로 돌아가기</span>
           </button>
-          
+
           <div className="text-center">
             <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">
               모든 직장인 유형 알아보기
@@ -76,15 +80,17 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
               >
                 <div className="flex items-center space-x-4">
                   <div className="flex-shrink-0">
-                    <Character type={type.character} size={60} showCard={false} />
+                    <Character
+                      type={type.character}
+                      size={60}
+                      showCard={false}
+                    />
                   </div>
                   <div className="text-left">
                     <h3 className="text-xl font-bold text-gray-800 mb-1">
                       {type.name}
                     </h3>
-                    <p className="text-gray-600">
-                      {type.description}
-                    </p>
+                    <p className="text-gray-600">{type.description}</p>
                   </div>
                 </div>
                 <div className="flex-shrink-0 ml-4">
@@ -101,21 +107,22 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                 {expandedTypes.has(type.id) && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
+                    animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
                     <div className="px-6 pb-6 border-t border-gray-100">
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                        
                         {/* 왼쪽 컬럼 */}
                         <div className="space-y-6">
                           {/* 주요 특징 */}
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <SparklesIcon size={18} color={type.color} />
-                              <h4 className="font-semibold text-gray-800">주요 특징</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                주요 특징
+                              </h4>
                             </div>
                             <div className="flex flex-wrap gap-2">
                               {type.traits.map((trait, idx) => (
@@ -134,7 +141,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <BookIcon size={18} color="#6B7280" />
-                              <h4 className="font-semibold text-gray-800">특징 설명</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                특징 설명
+                              </h4>
                             </div>
                             <p className="text-gray-700 leading-relaxed">
                               {type.detailedDescription}
@@ -148,7 +157,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <HeartIcon size={18} color="#10B981" />
-                              <h4 className="font-semibold text-gray-800">필요한 것</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                필요한 것
+                              </h4>
                             </div>
                             <div className="space-y-2">
                               {type.needs.map((need, idx) => (
@@ -157,7 +168,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                                   className="p-3 bg-green-50 rounded-lg border-l-4"
                                   style={{ borderLeftColor: type.color }}
                                 >
-                                  <span className="text-gray-700 text-sm">{need}</span>
+                                  <span className="text-gray-700 text-sm">
+                                    {need}
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -167,7 +180,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <WarningIcon size={18} color="#F59E0B" />
-                              <h4 className="font-semibold text-gray-800">주의사항</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                주의사항
+                              </h4>
                             </div>
                             <div className="p-4 bg-yellow-50 rounded-lg border-l-4 border-yellow-400">
                               <p className="text-gray-700 text-sm leading-relaxed">
@@ -180,7 +195,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
                               <CheckIcon size={18} color="#6B7280" />
-                              <h4 className="font-semibold text-gray-800">추천 직무</h4>
+                              <h4 className="font-semibold text-gray-800">
+                                추천 직무
+                              </h4>
                             </div>
                             <div className="grid grid-cols-2 gap-2">
                               {type.recommendedJobs.map((job, idx) => (
@@ -188,7 +205,9 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
                                   key={idx}
                                   className="p-3 bg-gray-50 rounded-lg text-center"
                                 >
-                                  <span className="text-gray-700 text-sm font-medium">{job}</span>
+                                  <span className="text-gray-700 text-sm font-medium">
+                                    {job}
+                                  </span>
                                 </div>
                               ))}
                             </div>
@@ -218,7 +237,7 @@ export default function AllResultsPage({ onBack }: AllResultsPageProps) {
               10개의 간단한 질문으로 나만의 직장인 유형을 찾아보세요!
             </p>
             <button
-              onClick={onBack}
+              onClick={onRestart}
               className="modern-button-primary px-8 py-3 text-lg font-semibold"
             >
               테스트 다시 하기

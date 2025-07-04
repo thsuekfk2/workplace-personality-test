@@ -180,7 +180,7 @@ export const personalityTypes: PersonalityType[] = [
     traits: ["솔직함", "객관적", "신뢰성", "분석적"],
     recommendedJobs: ["컨설턴트", "멘토", "코치", "분석가"],
     color: "#9B59B6",
-    character: "extrovert",
+    character: "thought",
     detailedDescription: [
       "말수가 적고 신중함",
       "간단명료하게 자신의 생각을 표현함",
