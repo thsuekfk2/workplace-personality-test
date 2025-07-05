@@ -11,7 +11,7 @@ export const shareToKakao = (result: TestResult) => {
       objectType: "feed",
       content: {
         title: "직장인 성격 유형 테스트 결과",
-        description: `나는 "${personalityType.name}"입니다! 🎯\n\n${personalityType.description}\n\n당신의 직장인 유형도 알아보세요!`,
+        description: `나는 "${personalityType.name}"입니다! \n\n${personalityType.description}\n\n당신의 직장인 유형도 알아보세요!`,
         imageUrl: `${window.location.origin}/api/og?type=${personalityType.id}`,
         link: {
           mobileWebUrl: shareUrl,
@@ -37,7 +37,7 @@ export const shareToKakao = (result: TestResult) => {
 export const copyToClipboard = async (result: TestResult) => {
   const { personalityType } = result;
   const shareUrl = `${window.location.origin}/result/${personalityType.id}`;
-  const shareText = `직장인 성격 유형 테스트 결과 🎯
+  const shareText = `직장인 성격 유형 테스트 결과 
 
 나는 "${personalityType.name}"입니다!
 
@@ -70,7 +70,7 @@ ${shareUrl}`;
   }
 };
 
-// 간단한 이미지 캡쳐 기능 (html-to-image 사용)
+// 모바일 친화적 이미지 캡쳐 기능
 export const captureResult = async (
   elementId: string,
   filename: string = "result.png"
@@ -81,13 +81,97 @@ export const captureResult = async (
       throw new Error("캡쳐할 요소를 찾을 수 없습니다.");
     }
 
-    const dataUrl = await toPng(element, {
+    // 모바일 최적화 옵션
+    const isMobile =
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      );
+
+    const options = {
       backgroundColor: "#ffffff",
       pixelRatio: 2,
-      quality: 0.95,
+      quality: 1,
+      width: element.offsetWidth,
+      height: element.offsetHeight,
+      style: {
+        transform: "scale(1)",
+        transformOrigin: "top left",
+      },
+      // 이미지 로딩 대기
+      skipAutoScale: true,
+      useCORS: true,
+    };
+
+    // Next.js Image 컴포넌트를 일반 img로 변환
+    const nextImages = element.querySelectorAll("img[data-nimg]");
+    nextImages.forEach((img) => {
+      const htmlImg = img as HTMLImageElement;
+      const newImg = document.createElement("img");
+      newImg.src = htmlImg.src;
+      newImg.alt = htmlImg.alt;
+      newImg.style.cssText = htmlImg.style.cssText;
+      newImg.className = htmlImg.className;
+      htmlImg.parentNode?.replaceChild(newImg, htmlImg);
     });
 
-    // 다운로드
+    // 모바일에서는 박스 쉐도우 제거
+    const originalShadows: Array<{element: Element, boxShadow: string}> = [];
+    if (isMobile) {
+      const elementsWithShadow = element.querySelectorAll("*");
+      
+      elementsWithShadow.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const computedStyle = window.getComputedStyle(htmlEl);
+        if (computedStyle.boxShadow && computedStyle.boxShadow !== 'none') {
+          originalShadows.push({
+            element: el,
+            boxShadow: htmlEl.style.boxShadow
+          });
+          htmlEl.style.boxShadow = 'none';
+        }
+      });
+    }
+
+    // 이미지들이 모두 로드되었는지 확인
+    const images = element.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // 에러가 나도 계속 진행
+          setTimeout(() => resolve(), 3000); // 3초 타임아웃
+        });
+      })
+    );
+
+    const dataUrl = await toPng(element, options);
+
+    // 박스 쉐도우 복원
+    if (isMobile && originalShadows.length > 0) {
+      originalShadows.forEach(({element, boxShadow}) => {
+        (element as HTMLElement).style.boxShadow = boxShadow;
+      });
+    }
+
+    // 모바일에서는 새 탭으로 열기
+    if (isMobile) {
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head><title>결과 이미지</title></head>
+            <body style="margin:0;padding:0px;text-align:center;">
+              <img src="${dataUrl}" style="max-width:100%;height:auto;" />
+              <p>이미지를 길게 눌러서 저장하세요</p>
+            </body>
+          </html>
+        `);
+        return true;
+      }
+    }
+
+    // 데스크톱에서는 다운로드
     const link = document.createElement("a");
     link.download = filename;
     link.href = dataUrl;
@@ -114,9 +198,34 @@ export const showImageInNewTab = async (elementId: string) => {
       throw new Error("캡쳐할 요소를 찾을 수 없습니다.");
     }
 
+    // Next.js Image 컴포넌트를 일반 img로 변환
+    const nextImages = element.querySelectorAll("img[data-nimg]");
+    nextImages.forEach((img) => {
+      const htmlImg = img as HTMLImageElement;
+      const newImg = document.createElement("img");
+      newImg.src = htmlImg.src;
+      newImg.alt = htmlImg.alt;
+      newImg.style.cssText = htmlImg.style.cssText;
+      newImg.className = htmlImg.className;
+      htmlImg.parentNode?.replaceChild(newImg, htmlImg);
+    });
+
+    // 이미지 로딩 대기
+    const images = element.querySelectorAll("img");
+    await Promise.all(
+      Array.from(images).map((img) => {
+        if (img.complete) return Promise.resolve();
+        return new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve(); // 에러가 나도 계속 진행
+          setTimeout(() => resolve(), 3000); // 3초 타임아웃
+        });
+      })
+    );
+
     const dataUrl = await toPng(element, {
       backgroundColor: "#ffffff",
-      pixelRatio: 1.5,
+      pixelRatio: 1,
       quality: 0.9,
     });
 
