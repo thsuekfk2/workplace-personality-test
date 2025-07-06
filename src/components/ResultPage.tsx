@@ -14,7 +14,6 @@ import Character from "@/components/Characters";
 import {
   ShareIcon,
   RefreshIcon,
-  BarChartIcon,
   TrendingUpIcon,
   LightbulbIcon,
   CheckIcon,
@@ -51,7 +50,7 @@ export default function ResultPage({
   onRestart,
   onShowAllResults,
 }: ResultPageProps) {
-  const { personalityType, scores } = result;
+  const { personalityType } = result;
   const [stats, setStats] = useState(getStats());
   const [shareMessage, setShareMessage] = useState("");
   const [startTime] = useState(() => {
@@ -120,19 +119,6 @@ export default function ResultPage({
     setTimeout(() => setShareMessage(""), 3000);
   };
 
-  const maxScore = Math.max(...Object.values(scores));
-
-  const otherScores = Object.entries(scores)
-    .map(([key, score]) => ({
-      key: key,
-      name: personalityTypeNames[key] || key,
-      score: score,
-    }))
-    .filter((item) => item.key !== personalityType.id) // 현재 주 성격 타입 제외
-    .sort((a, b) => b.score - a.score) // 점수 높은 순으로 정렬
-    .slice(0, 3); // 상위 3개만
-
-  console.log("Object.entries(scores)", Object.entries(scores));
   const popularTypeId = getMostPopularType();
   const popularType = popularTypeId
     ? personalityTypes.find((t) => t.id === popularTypeId)
@@ -298,37 +284,6 @@ export default function ResultPage({
               </div>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.5 }}
-            className="modern-card rounded-xl p-6 mb-6"
-          >
-            <div className="flex items-center space-x-2 mb-4">
-              <BarChartIcon size={20} color="#6B7280" />
-              <h3 className="font-semibold text-gray-800">
-                다른 유형과의 비교
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {otherScores.map((item) => (
-                <div key={item.key} className="flex items-center">
-                  <div className="w-55 text-sm text-gray-600 capitalize">
-                    {item.name}
-                  </div>
-                  <div className="flex-1 bg-gray-200 rounded-full h-2 mx-3">
-                    <div
-                      className="bg-gray-400 h-2 rounded-full"
-                      style={{ width: `${(item.score / maxScore) * 100}%` }}
-                    />
-                  </div>
-                  <div className="text-sm text-gray-600 w-8">{item.score}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
           {stats.totalTests > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
