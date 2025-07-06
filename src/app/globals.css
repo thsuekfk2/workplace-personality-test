@@ -203,15 +203,6 @@ body {
   color: white;
 }
 
-/* 포커스 아웃라인 스타일 */
-button:focus,
-input:focus,
-textarea:focus,
-select:focus {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
-}
-
 button {
   cursor: pointer;
   user-select: none;
