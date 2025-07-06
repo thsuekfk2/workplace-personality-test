@@ -16,7 +16,7 @@ import {
   RefreshIcon,
   BarChartIcon,
   TrendingUpIcon,
-  SparklesIcon,
+  LightbulbIcon,
   CheckIcon,
   BookIcon,
   HeartIcon,
@@ -185,7 +185,7 @@ export default function ResultPage({
             <div className="space-y-8">
               <div>
                 <div className="flex items-center space-x-2 mb-3">
-                  <SparklesIcon size={20} color="#6B7280" />
+                  <LightbulbIcon size={20} color="#6B7280" />
                   <h3 className="font-semibold text-gray-800">주요 특징</h3>
                 </div>
                 <div className="flex flex-wrap gap-3">
@@ -422,7 +422,7 @@ export default function ResultPage({
             onClick={onShowAllResults}
             className="modern-button modern-button-primary px-8 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
           >
-            <SparklesIcon size={20} color="white" />
+            <BookIcon size={20} color="white" />
             <span>모든 결과 보기</span>
           </motion.button>
 

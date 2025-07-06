@@ -7,7 +7,7 @@ import Character from "@/components/Characters";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
-  SparklesIcon,
+  LightbulbIcon,
   HeartIcon,
   WarningIcon,
   CheckIcon,
@@ -124,7 +124,7 @@ export default function AllResultsPage({
                           {/* 주요 특징 */}
                           <div>
                             <div className="flex items-center space-x-2 mb-3">
-                              <SparklesIcon size={18} color={type.color} />
+                              <LightbulbIcon size={18} color={type.color} />
                               <h4 className="font-semibold text-gray-800">
                                 주요 특징
                               </h4>
