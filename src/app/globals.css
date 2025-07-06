@@ -240,18 +240,9 @@ button {
   margin-right: 5px;
 }
 
-/* 모바일에서 모든 애니메이션 제거 */
+/* 모바일에서 transition-duration 애니메이션 제거 */
 @media (max-width: 768px) {
   * {
-    animation-duration: 0s !important;
-    animation-delay: 0s !important;
     transition-duration: 0s !important;
-    transition-delay: 0s !important;
-  }
-
-  /* motion 컴포넌트 강제 표시 */
-  [data-framer-component-type] {
-    opacity: 1 !important;
-    transform: none !important;
   }
 }
