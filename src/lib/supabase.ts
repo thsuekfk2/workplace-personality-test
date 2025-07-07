@@ -146,9 +146,23 @@ export async function saveTestSession(data: TestSessionData) {
 export interface TestAnswerData {
   user_id: string;
   question_number: number;
-  answer: 'a' | 'b';
+  answer: "a" | "b";
   answer_value: 1 | 2;
   weighted_types: string[];
+}
+
+// 통계 조회 결과 타입 정의
+export interface TestStatisticsRow {
+  result_type: string;
+  result_name: string;
+  completion_time: number;
+}
+
+// 통계 데이터 타입 정의
+export interface TestStatistics {
+  total: number;
+  byType: Record<string, { count: number; name: string; percentage: number }>;
+  avgCompletionTime: number;
 }
 
 // 답안 저장 (UPSERT 방식)
@@ -204,20 +218,38 @@ export async function getAllCompletedTests() {
   }
 }
 
-// 통계 정보 조회 (새로운 구조)
-export async function getTestStatistics() {
+// 통계 정보 조회 (최적화된 구조)
+export async function getTestStatistics(): Promise<
+  | { success: true; data: TestStatistics }
+  | { success: false; error: unknown }
+> {
   if (!supabase) {
     return { success: false, error: "Supabase not configured" };
   }
 
   try {
+    // 최근 30일 데이터만 조회 + 최대 5000개 제한
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
     const { data, error } = await supabase
       .from("test_sessions")
       .select("result_type, result_name, completion_time")
-      .eq("is_complete", true);
+      .eq("is_complete", true)
+      .gte("created_at", thirtyDaysAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(5000);
 
     if (error) {
       console.error("통계 조회 실패:", error);
+      // 테이블이 없는 경우 빈 결과 반환
+      if (error.code === "42P01" || error.message.includes("does not exist")) {
+        console.log("테이블이 존재하지 않음 - 빈 통계 반환");
+        return {
+          success: true,
+          data: { total: 0, byType: {}, avgCompletionTime: 0 },
+        };
+      }
       return { success: false, error };
     }
 
@@ -232,7 +264,7 @@ export async function getTestStatistics() {
     };
 
     // 유형별 카운트
-    data.forEach((response) => {
+    data.forEach((response: TestStatisticsRow) => {
       if (response.result_type && !stats.byType[response.result_type]) {
         stats.byType[response.result_type] = {
           count: 0,
@@ -246,7 +278,7 @@ export async function getTestStatistics() {
     });
 
     // 퍼센티지 계산
-    Object.keys(stats.byType).forEach((type) => {
+    Object.keys(stats.byType).forEach((type: string) => {
       stats.byType[type].percentage = Math.round(
         (stats.byType[type].count / stats.total) * 100
       );
@@ -255,7 +287,10 @@ export async function getTestStatistics() {
     // 평균 완료 시간 계산
     if (data.length > 0) {
       stats.avgCompletionTime = Math.round(
-        data.reduce((sum, r) => sum + (r.completion_time || 0), 0) / data.length
+        data.reduce(
+          (sum: number, r: TestStatisticsRow) => sum + (r.completion_time || 0),
+          0
+        ) / data.length
       );
     }
 
