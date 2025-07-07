@@ -37,23 +37,15 @@ export const shareToKakao = (result: TestResult) => {
 export const copyToClipboard = async (result: TestResult) => {
   const { personalityType } = result;
   const shareUrl = `${window.location.origin}/result/${personalityType.id}`;
-  const shareText = `직장인 성격 유형 테스트 결과 
-
-나는 "${personalityType.name}"입니다!
-
-${personalityType.description}
-
-당신의 직장인 유형도 알아보세요!
-${shareUrl}`;
 
   try {
     if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(shareUrl);
       return true;
     } else {
       // fallback for older browsers
       const textArea = document.createElement("textarea");
-      textArea.value = shareText;
+      textArea.value = shareUrl;
       textArea.style.position = "fixed";
       textArea.style.left = "-999999px";
       textArea.style.top = "-999999px";
