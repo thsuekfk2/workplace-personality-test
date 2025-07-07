@@ -231,7 +231,7 @@ export const captureResult = async (
     // 데스크톱에서는 다운로드
     const link = document.createElement("a");
     link.download =
-      `${filename.replace(/\.(png|jpg|jpeg)$/i, "")}_${timestamp}.$1` ||
+      `${filename.replace(/\.(png|jpg|jpeg)$/i, "")}_${timestamp}.png` ||
       `result_${timestamp}.png`;
     link.href = dataUrl;
     link.click();
