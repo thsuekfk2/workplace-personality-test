@@ -6,6 +6,7 @@ import { questions } from "@/lib/data";
 import { calculateResult, saveTestProgress } from "@/lib/testLogic";
 import { useState } from "react";
 import { ArrowLeftIcon } from "@/components/ModernIcons";
+import ErrorModal from "@/components/ErrorModal";
 
 interface TestPageProps {
   testState: TestState;
@@ -20,8 +21,72 @@ export default function TestPage({
 }: TestPageProps) {
   const [userId, setUserId] = useState<string>(""); // 사용자 ID 상태 관리
   const [isProcessing, setIsProcessing] = useState<boolean>(false); // API 요청 중 상태
+  const [errorMessage, setErrorMessage] = useState<string>(""); // 에러 메시지
+  const [retryCount, setRetryCount] = useState<number>(0); // 재시도 횟수
   const currentQuestion = questions[testState.currentQuestion];
   const progress = ((testState.currentQuestion + 1) / questions.length) * 100;
+
+  // API 재시도 로직
+  const saveProgressWithRetry = async (
+    requestData: Record<string, unknown>,
+    maxRetries = 2
+  ): Promise<boolean> => {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(
+          `진행 상황 저장 시도 ${attempt + 1}/${maxRetries + 1}:`,
+          requestData
+        );
+
+        const response = await fetch("/api/save-progress", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        });
+
+        const responseData = await response.json();
+
+        if (response.ok) {
+          console.log("진행 상황 저장 성공:", responseData);
+          // 서버에서 반환된 사용자 ID 저장
+          if (responseData.user_id && !userId) {
+            setUserId(responseData.user_id);
+          }
+          setErrorMessage(""); // 에러 메시지 초기화
+          setRetryCount(0); // 재시도 횟수 초기화
+          return true;
+        } else {
+          console.error(
+            "진행 상황 저장 API 오류:",
+            response.status,
+            responseData
+          );
+          if (attempt === maxRetries) {
+            throw new Error(
+              `서버 오류 (${response.status}): ${
+                responseData.message || "알 수 없는 오류"
+              }`
+            );
+          }
+        }
+      } catch (error) {
+        console.error(
+          `진행 상황 저장 네트워크 오류 (시도 ${attempt + 1}):`,
+          error
+        );
+        if (attempt === maxRetries) {
+          throw error;
+        }
+        // 재시도 전 잠시 대기
+        await new Promise((resolve) =>
+          setTimeout(resolve, 1000 * (attempt + 1))
+        );
+      }
+    }
+    return false;
+  };
 
   const handlePrevious = () => {
     if (testState.currentQuestion > 0 && !isProcessing) {
@@ -31,6 +96,7 @@ export default function TestPage({
       };
       setTestState(newState);
       saveTestProgress(newState.currentQuestion, newState.answers);
+      setErrorMessage(""); // 이전 문항으로 가면 에러 메시지 초기화
     }
   };
 
@@ -113,34 +179,28 @@ export default function TestPage({
         }),
       };
 
-      console.log("진행 상황 저장 요청 데이터:", requestData);
+      // 재시도 로직으로 저장 시도
+      const success = await saveProgressWithRetry(requestData);
 
-      const response = await fetch("/api/save-progress", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestData),
-      });
-
-      const responseData = await response.json();
-
-      if (response.ok) {
-        console.log("진행 상황 저장 성공:", responseData);
-        // 서버에서 반환된 사용자 ID 저장
-        if (responseData.user_id && !userId) {
-          setUserId(responseData.user_id);
-        }
-      } else {
-        console.error(
-          "진행 상황 저장 API 오류:",
-          response.status,
-          responseData
+      if (!success) {
+        // 모든 재시도 실패 시 에러 처리
+        setErrorMessage(
+          "답변 저장에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요."
         );
+        setRetryCount((prev) => prev + 1);
+        setIsProcessing(false);
+        return; // 다음 문항으로 넘어가지 않음
       }
-    } catch (error) {
-      console.error("진행 상황 저장 네트워크 오류:", error);
-      // 에러가 나도 테스트는 계속 진행
+    } catch (error: unknown) {
+      console.error("진행 상황 저장 중 예상치 못한 오류:", error);
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "예상치 못한 오류가 발생했습니다. 다시 시도해주세요."
+      );
+      setRetryCount((prev) => prev + 1);
+      setIsProcessing(false);
+      return; // 다음 문항으로 넘어가지 않음
     } finally {
       setIsProcessing(false); // API 요청 완료
     }
@@ -256,6 +316,37 @@ export default function TestPage({
             </div>
           </motion.div>
         </AnimatePresence>
+
+        {/* 에러 모달 */}
+        <ErrorModal
+          isOpen={!!errorMessage}
+          errorMessage={errorMessage}
+          retryCount={retryCount}
+          isProcessing={isProcessing}
+          onClose={() => setErrorMessage("")}
+          onRetry={() => {
+            setErrorMessage("");
+            const lastAnswer = testState.answers[testState.currentQuestion];
+            if (lastAnswer) {
+              handleAnswer(lastAnswer);
+            }
+          }}
+          onContinueWithoutSaving={() => {
+            setErrorMessage("");
+            const newState = {
+              ...testState,
+              answers: [...testState.answers],
+            };
+            if (testState.currentQuestion < questions.length - 1) {
+              newState.currentQuestion = testState.currentQuestion + 1;
+              setTestState(newState);
+              saveTestProgress(newState.currentQuestion, newState.answers);
+            } else {
+              const result = calculateResult(newState.answers);
+              onComplete(result);
+            }
+          }}
+        />
       </motion.div>
     </div>
   );
