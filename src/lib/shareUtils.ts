@@ -87,6 +87,8 @@ export const captureResult = async (
         navigator.userAgent
       );
 
+    const timestamp = Date.now();
+
     const options = {
       backgroundColor: "#ffffff",
       pixelRatio: 2,
@@ -100,34 +102,86 @@ export const captureResult = async (
       // 이미지 로딩 대기
       skipAutoScale: true,
       useCORS: true,
+      cacheBust: true,
+    };
+
+    // Next.js Image URL을 원본 URL로 변환하는 함수
+    const getOriginalSrc = (nextjsSrc: string): string => {
+      try {
+        const url = new URL(nextjsSrc, window.location.origin);
+        if (url.pathname === "/_next/image") {
+          const originalUrl = url.searchParams.get("url");
+          if (originalUrl) {
+            return originalUrl.startsWith("/")
+              ? `${window.location.origin}${originalUrl}`
+              : originalUrl;
+          }
+        }
+        return nextjsSrc;
+      } catch {
+        return nextjsSrc;
+      }
     };
 
     // Next.js Image 컴포넌트를 일반 img로 변환
     const nextImages = element.querySelectorAll("img[data-nimg]");
-    nextImages.forEach((img) => {
-      const htmlImg = img as HTMLImageElement;
-      const newImg = document.createElement("img");
-      newImg.src = htmlImg.src;
-      newImg.alt = htmlImg.alt;
-      newImg.style.cssText = htmlImg.style.cssText;
-      newImg.className = htmlImg.className;
-      htmlImg.parentNode?.replaceChild(newImg, htmlImg);
+    const imagePromises = Array.from(nextImages).map((img) => {
+      return new Promise<void>((resolve) => {
+        const htmlImg = img as HTMLImageElement;
+        const newImg = document.createElement("img");
+
+        // 원본 이미지 URL 추출 및 캐시 버스터 추가
+        const originalSrc = getOriginalSrc(htmlImg.src);
+        const separator = originalSrc.includes("?") ? "&" : "?";
+        newImg.src = `${originalSrc}${separator}t=${timestamp}&r=${Math.random()}`;
+
+        newImg.alt = htmlImg.alt;
+        newImg.style.cssText = htmlImg.style.cssText;
+        newImg.className = htmlImg.className;
+        newImg.crossOrigin = "anonymous";
+
+        const timeout = setTimeout(() => {
+          if (htmlImg.parentNode) {
+            htmlImg.parentNode.replaceChild(newImg, htmlImg);
+          }
+          resolve();
+        }, 5000);
+
+        newImg.onload = () => {
+          clearTimeout(timeout);
+          if (htmlImg.parentNode) {
+            htmlImg.parentNode.replaceChild(newImg, htmlImg);
+          }
+          resolve();
+        };
+
+        newImg.onerror = () => {
+          clearTimeout(timeout);
+          if (htmlImg.parentNode) {
+            htmlImg.parentNode.replaceChild(newImg, htmlImg);
+          }
+          resolve();
+        };
+      });
     });
 
+    // Next.js 이미지 교체 완료 대기
+    await Promise.all(imagePromises);
+
     // 모바일에서는 박스 쉐도우 제거
-    const originalShadows: Array<{element: Element, boxShadow: string}> = [];
+    const originalShadows: Array<{ element: Element; boxShadow: string }> = [];
     if (isMobile) {
       const elementsWithShadow = element.querySelectorAll("*");
-      
+
       elementsWithShadow.forEach((el) => {
         const htmlEl = el as HTMLElement;
         const computedStyle = window.getComputedStyle(htmlEl);
-        if (computedStyle.boxShadow && computedStyle.boxShadow !== 'none') {
+        if (computedStyle.boxShadow && computedStyle.boxShadow !== "none") {
           originalShadows.push({
             element: el,
-            boxShadow: htmlEl.style.boxShadow
+            boxShadow: htmlEl.style.boxShadow,
           });
-          htmlEl.style.boxShadow = 'none';
+          htmlEl.style.boxShadow = "none";
         }
       });
     }
@@ -136,20 +190,23 @@ export const captureResult = async (
     const images = element.querySelectorAll("img");
     await Promise.all(
       Array.from(images).map((img) => {
-        if (img.complete) return Promise.resolve();
+        if (img.complete && img.naturalHeight > 0) return Promise.resolve();
         return new Promise<void>((resolve) => {
           img.onload = () => resolve();
           img.onerror = () => resolve(); // 에러가 나도 계속 진행
-          setTimeout(() => resolve(), 3000); // 3초 타임아웃
+          setTimeout(() => resolve(), 5000); // 5초 타임아웃
         });
       })
     );
+
+    // 추가 안정화 대기
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const dataUrl = await toPng(element, options);
 
     // 박스 쉐도우 복원
     if (isMobile && originalShadows.length > 0) {
-      originalShadows.forEach(({element, boxShadow}) => {
+      originalShadows.forEach(({ element, boxShadow }) => {
         (element as HTMLElement).style.boxShadow = boxShadow;
       });
     }
@@ -173,7 +230,9 @@ export const captureResult = async (
 
     // 데스크톱에서는 다운로드
     const link = document.createElement("a");
-    link.download = filename;
+    link.download =
+      `${filename.replace(/\.(png|jpg|jpeg)$/i, "")}_${timestamp}.$1` ||
+      `result_${timestamp}.png`;
     link.href = dataUrl;
     link.click();
 
