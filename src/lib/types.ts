@@ -43,4 +43,6 @@ export interface TestState {
   answers: Array<"a" | "b">;
   isCompleted: boolean;
   result?: TestResult;
+  startTime?: number;
+  sessionStartTime?: number;
 }

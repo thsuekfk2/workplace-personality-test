@@ -24,6 +24,7 @@ export default function Home() {
     answers: [],
     isCompleted: false,
   });
+  const [sessionStartTime] = useState<number>(Date.now()); // 세션 시작 시간
 
   useEffect(() => {
     // 진행 중인 테스트가 있는지 확인
@@ -55,6 +56,11 @@ export default function Home() {
   };
 
   const handleIntroComplete = () => {
+    setTestState(prev => ({
+      ...prev,
+      startTime: Date.now(),
+      sessionStartTime: sessionStartTime
+    }));
     setCurrentPage("test");
   };
 
@@ -74,6 +80,7 @@ export default function Home() {
       currentQuestion: 0,
       answers: [],
       isCompleted: false,
+      startTime: undefined,
     });
     clearTestProgress();
     clearTestResult(); // 저장된 결과도 삭제
