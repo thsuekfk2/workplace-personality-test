@@ -37,6 +37,23 @@ export default function AllResultsPage({
       newExpanded.delete(typeId);
     } else {
       newExpanded.add(typeId);
+
+      // 박스를 열 때 해당 요소로 스크롤 (애니메이션 완료 후)
+      setTimeout(() => {
+        const element = document.getElementById(`accordion-${typeId}`);
+        if (element) {
+          // 헤더 높이를 고려한 오프셋 계산
+          const headerOffset = 100; // 헤더와 여백을 위한 오프셋
+          const elementPosition =
+            element.getBoundingClientRect().top + window.pageYOffset;
+          const offsetPosition = elementPosition - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }, 350);
     }
     setExpandedTypes(newExpanded);
   };
@@ -73,6 +90,7 @@ export default function AllResultsPage({
           {personalityTypes.map((type, index) => (
             <motion.div
               key={type.id}
+              id={`accordion-${type.id}`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
