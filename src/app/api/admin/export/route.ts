@@ -1,6 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAllCompletedTests } from '@/lib/supabase';
 
+// 완료된 테스트 응답 타입 정의
+interface CompletedTestResponse {
+  created_at: string;
+  user_id: string;
+  result_name: string;
+  result_type: string;
+  result_type_code: string;
+  completion_time: number;
+  session_time: number;
+  answers: number[];
+  referrer: string;
+  country: string;
+  region: string;
+  city: string;
+  device_type: string;
+  os: string;
+  browser_name: string;
+  browser_version: string;
+  screen_resolution: string;
+  viewport_size: string;
+  user_agent: string;
+  ip_address: string;
+}
+
 export async function GET(request: NextRequest) {
   try {
     // 간단한 인증 확인
@@ -18,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     if (result.success) {
       // 엑셀용 데이터 포맷팅
-      const formattedData = result.data?.map((response: any, index: number) => ({
+      const formattedData = result.data?.map((response: CompletedTestResponse, index: number) => ({
         번호: index + 1,
         제출일시: new Date(response.created_at).toLocaleString('ko-KR'),
         사용자ID: response.user_id,

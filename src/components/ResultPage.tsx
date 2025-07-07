@@ -52,7 +52,11 @@ export default function ResultPage({
 }: ResultPageProps) {
   const { personalityType } = result;
   const [stats, setStats] = useState(getStats());
-  const [dbStats, setDbStats] = useState<any>(null);
+  const [dbStats, setDbStats] = useState<{
+    total: number;
+    byType: Record<string, { count: number; name: string; percentage: number }>;
+    avgCompletionTime: number;
+  } | null>(null);
   const [shareMessage, setShareMessage] = useState("");
   const hasLoadedStats = useRef(false);
   const [startTime] = useState(() => {
@@ -146,12 +150,12 @@ export default function ResultPage({
   };
 
   // DB 통계 우선, fallback으로 로컬 통계 사용
-  const displayStats = dbStats || stats;
-  const popularTypeId = dbStats
-    ? Object.keys(dbStats.byType || {}).reduce((a, b) =>
-        (dbStats.byType[a]?.count || 0) > (dbStats.byType[b]?.count || 0)
-          ? a
-          : b
+  const displayTotalTests = dbStats?.total || stats.totalTests || 0;
+  const displayAvgTime = dbStats?.avgCompletionTime || stats.averageCompletionTime || 0;
+  
+  const popularTypeId = dbStats 
+    ? Object.keys(dbStats.byType || {}).reduce((a, b) => 
+        (dbStats.byType[a]?.count || 0) > (dbStats.byType[b]?.count || 0) ? a : b
       )
     : getMostPopularType();
   const popularType = popularTypeId
@@ -318,7 +322,7 @@ export default function ResultPage({
               </div>
             </div>
           </motion.div>
-          {(displayStats.totalTests || displayStats.total) > 0 && (
+          {displayTotalTests > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -337,7 +341,7 @@ export default function ResultPage({
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
                   <div className="text-2xl font-bold text-blue-600">
-                    {displayStats.total || displayStats.totalTests || 0}
+                    {displayTotalTests}
                   </div>
                   <div className="text-sm text-gray-600">총 테스트 횟수</div>
                 </div>
@@ -364,11 +368,9 @@ export default function ResultPage({
                 )}
                 <div className="p-3 bg-purple-50 rounded-lg flex flex-col items-center justify-center">
                   <div className="text-lg font-bold text-purple-600">
-                    {displayStats.avgCompletionTime
-                      ? `${displayStats.avgCompletionTime}초`
-                      : formatCompletionTime(
-                          displayStats.averageCompletionTime || 0
-                        )}
+                    {dbStats 
+                      ? `${displayAvgTime}초`
+                      : formatCompletionTime(displayAvgTime)}
                   </div>
                   <div className="text-sm text-gray-600">평균 소요 시간</div>
                 </div>

@@ -79,8 +79,8 @@ export async function POST(request: NextRequest) {
       const answerData = {
         user_id: userId,
         question_number: body.current_question,
-        answer: body.answer,
-        answer_value: body.answer === 'a' ? 1 : 2,
+        answer: body.answer as 'a' | 'b',
+        answer_value: (body.answer === 'a' ? 1 : 2) as 1 | 2,
         weighted_types: weightedTypes, // weights가 1인 타입들
       };
 
