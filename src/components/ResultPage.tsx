@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { TestResult } from "@/lib/types";
 import {
   updateStats,
@@ -52,7 +52,9 @@ export default function ResultPage({
 }: ResultPageProps) {
   const { personalityType } = result;
   const [stats, setStats] = useState(getStats());
+  const [dbStats, setDbStats] = useState<any>(null);
   const [shareMessage, setShareMessage] = useState("");
+  const hasLoadedStats = useRef(false);
   const [startTime] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("testStartTime");
@@ -73,6 +75,30 @@ export default function ResultPage({
     // 카카오 SDK 로드
     loadKakaoSDK().catch(console.error);
   }, [personalityType.id, startTime]);
+
+  useEffect(() => {
+    // DB에서 실시간 통계 가져오기 (한 번만)
+    if (!hasLoadedStats.current) {
+      hasLoadedStats.current = true;
+      fetchDbStats();
+    }
+  }, []);
+
+  const fetchDbStats = async () => {
+    try {
+      console.log("통계 API 호출 시작");
+      const response = await fetch("/api/stats");
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setDbStats(result.data);
+          console.log("통계 데이터 로드 완료:", result.data);
+        }
+      }
+    } catch (error) {
+      console.error("통계 조회 실패:", error);
+    }
+  };
 
   const handleKakaoShare = () => {
     shareToKakao(result);
@@ -119,7 +145,15 @@ export default function ResultPage({
     setTimeout(() => setShareMessage(""), 3000);
   };
 
-  const popularTypeId = getMostPopularType();
+  // DB 통계 우선, fallback으로 로컬 통계 사용
+  const displayStats = dbStats || stats;
+  const popularTypeId = dbStats
+    ? Object.keys(dbStats.byType || {}).reduce((a, b) =>
+        (dbStats.byType[a]?.count || 0) > (dbStats.byType[b]?.count || 0)
+          ? a
+          : b
+      )
+    : getMostPopularType();
   const popularType = popularTypeId
     ? personalityTypes.find((t) => t.id === popularTypeId)
     : null;
@@ -284,7 +318,7 @@ export default function ResultPage({
               </div>
             </div>
           </motion.div>
-          {stats.totalTests > 0 && (
+          {(displayStats.totalTests || displayStats.total) > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -293,12 +327,17 @@ export default function ResultPage({
             >
               <div className="flex items-center space-x-2 mb-4">
                 <TrendingUpIcon size={20} color="#6B7280" />
-                <h3 className="font-semibold text-gray-800">테스트 통계</h3>
+                <h3 className="font-semibold text-gray-800">
+                  테스트 통계{" "}
+                  {dbStats && (
+                    <span className="text-xs text-green-600">(실시간)</span>
+                  )}
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                 <div className="p-3 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
                   <div className="text-2xl font-bold text-blue-600">
-                    {stats.totalTests}
+                    {displayStats.total || displayStats.totalTests || 0}
                   </div>
                   <div className="text-sm text-gray-600">총 테스트 횟수</div>
                 </div>
@@ -310,12 +349,26 @@ export default function ResultPage({
                     <div className="text-sm font-bold text-green-600">
                       {popularType.name}
                     </div>
-                    <div className="text-sm text-gray-600">가장 많은 유형</div>
+                    <div className="text-sm text-gray-600">
+                      가장 많은 유형
+                      {dbStats &&
+                        popularTypeId &&
+                        dbStats.byType[popularTypeId] && (
+                          <span className="block text-xs">
+                            ({dbStats.byType[popularTypeId].count}명,{" "}
+                            {dbStats.byType[popularTypeId].percentage}%)
+                          </span>
+                        )}
+                    </div>
                   </div>
                 )}
                 <div className="p-3 bg-purple-50 rounded-lg flex flex-col items-center justify-center">
                   <div className="text-lg font-bold text-purple-600">
-                    {formatCompletionTime(stats.averageCompletionTime)}
+                    {displayStats.avgCompletionTime
+                      ? `${displayStats.avgCompletionTime}초`
+                      : formatCompletionTime(
+                          displayStats.averageCompletionTime || 0
+                        )}
                   </div>
                   <div className="text-sm text-gray-600">평균 소요 시간</div>
                 </div>
