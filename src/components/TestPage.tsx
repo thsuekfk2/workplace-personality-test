@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { TestState, TestResult } from "@/lib/types";
 import { questions } from "@/lib/data";
 import { calculateResult, saveTestProgress } from "@/lib/testLogic";
+import { useState } from "react";
 
 interface TestPageProps {
   testState: TestState;
@@ -16,10 +17,19 @@ export default function TestPage({
   setTestState,
   onComplete,
 }: TestPageProps) {
+  const [userId, setUserId] = useState<string>(''); // 사용자 ID 상태 관리
+  const [isProcessing, setIsProcessing] = useState<boolean>(false); // API 요청 중 상태
   const currentQuestion = questions[testState.currentQuestion];
   const progress = ((testState.currentQuestion + 1) / questions.length) * 100;
 
-  const handleAnswer = (answer: "a" | "b") => {
+  const handleAnswer = async (answer: "a" | "b") => {
+    // 이미 처리 중이면 무시
+    if (isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true); // API 요청 시작
+
     const newAnswers = [...testState.answers];
     newAnswers[testState.currentQuestion] = answer;
 
@@ -28,11 +38,95 @@ export default function TestPage({
       answers: newAnswers,
     };
 
+    // 매번 답안을 서버에 저장
+    try {
+      const { getDeviceInfo, getReferrer, getLocationInfo } = await import('@/lib/deviceDetection');
+      
+      const now = Date.now();
+      const completionTime = testState.startTime 
+        ? Math.floor((now - testState.startTime) / 1000)
+        : 0;
+      const sessionTime = testState.sessionStartTime
+        ? Math.floor((now - testState.sessionStartTime) / 1000)
+        : 0;
+
+      // 디바이스 정보 수집 (첫 번째 답안에서만)
+      let deviceInfo = {};
+      let referrer = '';
+      let locationInfo = { country: 'unknown', region: 'unknown', city: 'unknown' };
+      
+      if (testState.currentQuestion === 0) {
+        deviceInfo = getDeviceInfo();
+        referrer = getReferrer();
+        
+        // 위치 정보 비동기 수집 (실패해도 계속 진행)
+        try {
+          locationInfo = await getLocationInfo();
+        } catch (error) {
+          console.warn('위치 정보 수집 실패:', error);
+        }
+      }
+
+      const isLastQuestion = testState.currentQuestion === questions.length - 1;
+      const result = isLastQuestion ? calculateResult(newAnswers) : null;
+
+      const requestData = {
+        user_id: userId || undefined, // 기존 사용자 ID 전달
+        current_question: testState.currentQuestion,
+        answer: answer,
+        completion_time: completionTime,
+        session_time: sessionTime,
+        is_complete: isLastQuestion,
+        
+        // 테스트 완료 시 결과 정보 추가
+        ...(isLastQuestion && result && {
+          result_type: result.personalityType.id,
+          result_name: result.personalityType.name,
+          result_type_code: result.personalityType.type, // aa, ab, bb, ba
+        }),
+        
+        ...(testState.currentQuestion === 0 && {
+          referrer,
+          ...locationInfo,
+          ...deviceInfo,
+          user_agent: typeof window !== 'undefined' ? navigator.userAgent : 'unknown',
+        }),
+      };
+
+      console.log('진행 상황 저장 요청 데이터:', requestData);
+
+      const response = await fetch('/api/save-progress', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      const responseData = await response.json();
+      
+      if (response.ok) {
+        console.log('진행 상황 저장 성공:', responseData);
+        // 서버에서 반환된 사용자 ID 저장
+        if (responseData.user_id && !userId) {
+          setUserId(responseData.user_id);
+        }
+      } else {
+        console.error('진행 상황 저장 API 오류:', response.status, responseData);
+      }
+    } catch (error) {
+      console.error('진행 상황 저장 네트워크 오류:', error);
+      // 에러가 나도 테스트는 계속 진행
+    } finally {
+      setIsProcessing(false); // API 요청 완료
+    }
+
     if (testState.currentQuestion < questions.length - 1) {
       newState.currentQuestion = testState.currentQuestion + 1;
       setTestState(newState);
       saveTestProgress(newState.currentQuestion, newAnswers);
     } else {
+      // 마지막 질문인 경우 결과 계산 후 완료 처리
       const result = calculateResult(newAnswers);
       onComplete(result);
     }
@@ -84,7 +178,10 @@ export default function TestPage({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleAnswer("a")}
-                className="w-full p-5 md:p-6 text-left option-card option-card-blue rounded-xl group touch-target"
+                disabled={isProcessing}
+                className={`w-full p-5 md:p-6 text-left option-card option-card-blue rounded-xl group touch-target ${
+                  isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4 group-hover:scale-110 transition-transform">
@@ -100,7 +197,10 @@ export default function TestPage({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleAnswer("b")}
-                className="w-full p-5 md:p-6 text-left option-card option-card-purple rounded-xl group touch-target"
+                disabled={isProcessing}
+                className={`w-full p-5 md:p-6 text-left option-card option-card-purple rounded-xl group touch-target ${
+                  isProcessing ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
                 <div className="flex items-center">
                   <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4 group-hover:scale-110 transition-transform">
