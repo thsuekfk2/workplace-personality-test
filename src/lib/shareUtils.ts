@@ -88,7 +88,7 @@ export const captureResult = async (
       width: element.offsetWidth,
       height: element.offsetHeight,
       style: {
-        transform: "scale(1)",
+        transform: isMobile ? "scale(0.98)" : "scale(1)",
         transformOrigin: "top left",
       },
       // 이미지 로딩 대기
@@ -123,7 +123,9 @@ export const captureResult = async (
         const newImg = document.createElement("img");
 
         // 원본 이미지 URL 추출 및 캐시 버스터 추가
-        const originalSrc = getOriginalSrc(htmlImg.src);
+        const originalSrc = isMobile
+          ? htmlImg.src
+          : getOriginalSrc(htmlImg.src);
         const separator = originalSrc.includes("?") ? "&" : "?";
         newImg.src = `${originalSrc}${separator}t=${timestamp}&r=${Math.random()}`;
 
