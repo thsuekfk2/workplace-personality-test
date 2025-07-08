@@ -277,38 +277,70 @@ export default function TestPage({
             </div>
             <div className="space-y-5">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={!isProcessing ? { scale: 1.02 } : {}}
+                whileTap={!isProcessing ? { scale: 0.98 } : {}}
                 onClick={() => handleAnswer("a")}
                 disabled={isProcessing}
                 className={`w-full p-5 md:p-6 text-left option-card option-card-blue rounded-xl group touch-target ${
-                  isProcessing ? "opacity-50 cursor-not-allowed" : ""
+                  isProcessing ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
                 }`}
               >
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4 group-hover:scale-110 transition-transform">
-                    A
+                  <div className={`w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
+                    !isProcessing ? "group-hover:scale-110" : ""
+                  }`}>
+                    {isProcessing ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      "A"
+                    )}
                   </div>
-                  <p className="text-gray-700 group-hover:text-gray-900 font-medium leading-relaxed">
+                  <p className={`font-medium leading-relaxed ${
+                    !isProcessing ? "text-gray-700 group-hover:text-gray-900" : "text-gray-700"
+                  }`}>
                     {currentQuestion.options.a}
                   </p>
                 </div>
               </motion.button>
 
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={!isProcessing ? { scale: 1.02 } : {}}
+                whileTap={!isProcessing ? { scale: 0.98 } : {}}
                 onClick={() => handleAnswer("b")}
                 disabled={isProcessing}
                 className={`w-full p-5 md:p-6 text-left option-card option-card-purple rounded-xl group touch-target ${
-                  isProcessing ? "opacity-50 cursor-not-allowed" : ""
+                  isProcessing ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
                 }`}
               >
                 <div className="flex items-center">
-                  <div className="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4 group-hover:scale-110 transition-transform">
-                    B
+                  <div className={`w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
+                    !isProcessing ? "group-hover:scale-110" : ""
+                  }`}>
+                    {isProcessing ? (
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{
+                          duration: 1,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      "B"
+                    )}
                   </div>
-                  <p className="text-gray-700 group-hover:text-gray-900 font-medium leading-relaxed">
+                  <p className={`font-medium leading-relaxed ${
+                    !isProcessing ? "text-gray-700 group-hover:text-gray-900" : "text-gray-700"
+                  }`}>
                     {currentQuestion.options.b}
                   </p>
                 </div>
@@ -316,7 +348,6 @@ export default function TestPage({
             </div>
           </motion.div>
         </AnimatePresence>
-
         {/* 에러 모달 */}
         <ErrorModal
           isOpen={!!errorMessage}
