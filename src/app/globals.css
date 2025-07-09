@@ -102,44 +102,44 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
-/* 컬러 버튼 변형 */
+/* 무채색 버튼 변형 */
 .modern-button-primary {
-  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  background: linear-gradient(145deg, #4a5568, #2d3748);
   color: white;
-  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3),
-    0 2px 4px rgba(59, 130, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(74, 85, 104, 0.3),
+    0 2px 4px rgba(74, 85, 104, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .modern-button-primary:hover {
-  background: linear-gradient(145deg, #2563eb, #1d4ed8);
-  box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4),
-    0 4px 8px rgba(59, 130, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(145deg, #2d3748, #1a202c);
+  box-shadow: 0 8px 30px rgba(74, 85, 104, 0.4),
+    0 4px 8px rgba(74, 85, 104, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .modern-button-success {
-  background: linear-gradient(145deg, #10b981, #059669);
+  background: linear-gradient(145deg, #718096, #4a5568);
   color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3),
-    0 2px 4px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3),
+    0 2px 4px rgba(113, 128, 150, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .modern-button-success:hover {
-  background: linear-gradient(145deg, #059669, #047857);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4),
-    0 4px 8px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(145deg, #4a5568, #2d3748);
+  box-shadow: 0 8px 30px rgba(113, 128, 150, 0.4),
+    0 4px 8px rgba(113, 128, 150, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .modern-button-purple {
-  background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(145deg, #a0aec0, #718096);
   color: white;
-  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3),
-    0 2px 4px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(160, 174, 192, 0.3),
+    0 2px 4px rgba(160, 174, 192, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .modern-button-purple:hover {
-  background: linear-gradient(145deg, #7c3aed, #6d28d9);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4),
-    0 4px 8px rgba(139, 92, 246, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(145deg, #718096, #4a5568);
+  box-shadow: 0 8px 30px rgba(160, 174, 192, 0.4),
+    0 4px 8px rgba(160, 174, 192, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 /* 선택 옵션 카드 */
@@ -152,7 +152,7 @@ body {
 
 .option-card:hover {
   background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(113, 128, 150, 0.3);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
   transform: translateY(-2px);
 }
@@ -160,19 +160,19 @@ body {
 .option-card-blue:hover {
   background: linear-gradient(
     145deg,
-    rgba(239, 246, 255, 0.9),
-    rgba(219, 234, 254, 0.9)
+    rgba(247, 250, 252, 0.9),
+    rgba(237, 242, 247, 0.9)
   );
-  border-color: rgba(59, 130, 246, 0.4);
+  border-color: rgba(113, 128, 150, 0.4);
 }
 
 .option-card-purple:hover {
   background: linear-gradient(
     145deg,
-    rgba(245, 243, 255, 0.9),
-    rgba(237, 233, 254, 0.9)
+    rgba(250, 251, 252, 0.9),
+    rgba(247, 250, 252, 0.9)
   );
-  border-color: rgba(139, 92, 246, 0.4);
+  border-color: rgba(160, 174, 192, 0.4);
 }
 
 /* 프로그레스 바 */
@@ -182,8 +182,8 @@ body {
 }
 
 .modern-progress-bar {
-  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3),
+  background: linear-gradient(90deg, #4a5568, #718096);
+  box-shadow: 0 2px 8px rgba(74, 85, 104, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 

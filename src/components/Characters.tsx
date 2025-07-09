@@ -92,35 +92,35 @@ export default function Character({
     >
       {/* 배지 카드 배경 */}
       <div
-        className="w-full h-full rounded-3xl relative overflow-hidden"
+        className="relative w-full h-full overflow-hidden rounded-3xl"
         style={{ background: data.bgPattern }}
       >
         {/* 캐릭터 영역 */}
-        <div className="absolute top-6 left-1/2 transform -translate-x-1/2">
-          <div className="w-24 h-24 bg-white/95 rounded-full flex items-center justify-center shadow-lg border-4 border-white/50 overflow-hidden">
+        <div className="absolute transform -translate-x-1/2 top-6 left-1/2">
+          <div className="flex items-center justify-center w-24 h-24 overflow-hidden border-4 rounded-full shadow-lg bg-white/95 border-white/50">
             <Image
               src={data.imagePath}
               alt={data.name}
               width={100}
               height={100}
-              className="w-24 h-24 object-contain"
+              className="object-contain w-24 h-24"
             />
           </div>
         </div>
 
         {/* 장식적 요소들 */}
-        <div className="absolute top-2 right-2 w-2 h-2 bg-white/40 rounded-full"></div>
-        <div className="absolute bottom-2 left-2 w-1 h-1 bg-white/40 rounded-full"></div>
+        <div className="absolute w-2 h-2 rounded-full top-2 right-2 bg-white/40"></div>
+        <div className="absolute w-1 h-1 rounded-full bottom-2 left-2 bg-white/40"></div>
 
         {/* 반짝이는 효과 */}
-        <div className="absolute top-4 left-4 w-3 h-3 bg-white/50 rounded-full animate-pulse"></div>
+        <div className="absolute w-3 h-3 rounded-full top-4 left-4 bg-white/50 animate-pulse"></div>
         <div
-          className="absolute top-8 right-6 w-2 h-2 bg-white/40 rounded-full animate-pulse"
+          className="absolute w-2 h-2 rounded-full top-8 right-6 bg-white/40 animate-pulse"
           style={{ animationDelay: "0.5s" }}
         ></div>
 
         {/* 그라데이션 오버레이 */}
-        <div className="absolute inset-0  via-transparent to-white/20 rounded-3xl"></div>
+        <div className="absolute inset-0 via-transparent to-white/20 rounded-3xl"></div>
       </div>
     </motion.div>
   );

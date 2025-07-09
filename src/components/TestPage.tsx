@@ -217,7 +217,7 @@ export default function TestPage({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 md:p-8">
+    <div className="flex items-center justify-center min-h-screen p-4 md:p-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -225,7 +225,7 @@ export default function TestPage({
         className="w-full max-w-2xl mx-auto"
       >
         <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-4">
               {testState.currentQuestion > 0 && (
                 <motion.button
@@ -251,12 +251,12 @@ export default function TestPage({
               {testState.currentQuestion + 1} / {questions.length}
             </span>
           </div>
-          <div className="w-full modern-progress rounded-full h-3">
+          <div className="w-full h-3 rounded-full modern-progress">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
               transition={{ duration: 0.5 }}
-              className="modern-progress-bar h-3 rounded-full"
+              className="h-3 rounded-full modern-progress-bar"
             />
           </div>
         </div>
@@ -268,10 +268,10 @@ export default function TestPage({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -50 }}
             transition={{ duration: 0.3 }}
-            className="modern-card rounded-2xl p-6 md:p-8"
+            className="p-6 modern-card rounded-2xl md:p-8"
           >
             <div className="text-center my-[60px]">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+              <h2 className="mb-6 text-xl font-bold text-gray-800 md:text-2xl">
                 {currentQuestion.text}
               </h2>
             </div>
@@ -282,13 +282,17 @@ export default function TestPage({
                 onClick={() => handleAnswer("a")}
                 disabled={isProcessing}
                 className={`w-full p-5 md:p-6 text-left option-card option-card-blue rounded-xl group touch-target ${
-                  isProcessing ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                  isProcessing
+                    ? "opacity-50 cursor-not-allowed pointer-events-none"
+                    : ""
                 }`}
               >
                 <div className="flex items-center">
-                  <div className={`w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
-                    !isProcessing ? "group-hover:scale-110" : ""
-                  }`}>
+                  <div
+                    className={`w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
+                      !isProcessing ? "group-hover:scale-110" : ""
+                    }`}
+                  >
                     {isProcessing ? (
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -297,15 +301,19 @@ export default function TestPage({
                           repeat: Infinity,
                           ease: "linear",
                         }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-4 h-4 border-2 border-white rounded-full border-t-transparent"
                       />
                     ) : (
                       "A"
                     )}
                   </div>
-                  <p className={`font-medium leading-relaxed ${
-                    !isProcessing ? "text-gray-700 group-hover:text-gray-900" : "text-gray-700"
-                  }`}>
+                  <p
+                    className={`font-medium leading-relaxed ${
+                      !isProcessing
+                        ? "text-gray-700 group-hover:text-gray-900"
+                        : "text-gray-700"
+                    }`}
+                  >
                     {currentQuestion.options.a}
                   </p>
                 </div>
@@ -317,13 +325,17 @@ export default function TestPage({
                 onClick={() => handleAnswer("b")}
                 disabled={isProcessing}
                 className={`w-full p-5 md:p-6 text-left option-card option-card-purple rounded-xl group touch-target ${
-                  isProcessing ? "opacity-50 cursor-not-allowed pointer-events-none" : ""
+                  isProcessing
+                    ? "opacity-50 cursor-not-allowed pointer-events-none"
+                    : ""
                 }`}
               >
                 <div className="flex items-center">
-                  <div className={`w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
-                    !isProcessing ? "group-hover:scale-110" : ""
-                  }`}>
+                  <div
+                    className={`w-8 h-8 bg-black text-white rounded-full flex items-center justify-center font-bold mr-4 transition-transform ${
+                      !isProcessing ? "group-hover:scale-110" : ""
+                    }`}
+                  >
                     {isProcessing ? (
                       <motion.div
                         animate={{ rotate: 360 }}
@@ -332,15 +344,19 @@ export default function TestPage({
                           repeat: Infinity,
                           ease: "linear",
                         }}
-                        className="w-4 h-4 border-2 border-white border-t-transparent rounded-full"
+                        className="w-4 h-4 border-2 border-white rounded-full border-t-transparent"
                       />
                     ) : (
                       "B"
                     )}
                   </div>
-                  <p className={`font-medium leading-relaxed ${
-                    !isProcessing ? "text-gray-700 group-hover:text-gray-900" : "text-gray-700"
-                  }`}>
+                  <p
+                    className={`font-medium leading-relaxed ${
+                      !isProcessing
+                        ? "text-gray-700 group-hover:text-gray-900"
+                        : "text-gray-700"
+                    }`}
+                  >
                     {currentQuestion.options.b}
                   </p>
                 </div>
