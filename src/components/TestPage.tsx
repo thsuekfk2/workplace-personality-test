@@ -26,56 +26,69 @@ export default function TestPage({
   const currentQuestion = questions[testState.currentQuestion];
   const progress = ((testState.currentQuestion + 1) / questions.length) * 100;
 
-  // API 재시도 로직
-  const saveProgressWithRetry = async (
-    requestData: Record<string, unknown>,
+  // Supabase 직접 저장 로직
+  const saveAnswerDirectly = async (
+    userId: string,
+    questionNumber: number,
+    answer: "a" | "b",
     maxRetries = 2
-  ): Promise<boolean> => {
+  ): Promise<{ success: boolean; userId: string }> => {
+    const { saveTestAnswer } = await import("@/lib/supabase");
+    const { questions } = await import("@/lib/data");
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        console.log(
-          `진행 상황 저장 시도 ${attempt + 1}/${maxRetries + 1}:`,
-          requestData
-        );
+        // 첫 번째 답안이면 사용자 ID 생성
+        const currentUserId =
+          userId ||
+          `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
-        const response = await fetch("/api/save-progress", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        });
+        // 첫 번째 답안이면 세션 생성
+        if (!userId) {
+          const { saveTestSession } = await import("@/lib/supabase");
+          const sessionResult = await saveTestSession({
+            user_id: currentUserId,
+            current_question: 0,
+            session_time: 0,
+            is_complete: false,
+          });
 
-        const responseData = await response.json();
-
-        if (response.ok) {
-          console.log("진행 상황 저장 성공:", responseData);
-          // 서버에서 반환된 사용자 ID 저장
-          if (responseData.user_id && !userId) {
-            setUserId(responseData.user_id);
-          }
-          setErrorMessage(""); // 에러 메시지 초기화
-          setRetryCount(0); // 재시도 횟수 초기화
-          return true;
-        } else {
-          console.error(
-            "진행 상황 저장 API 오류:",
-            response.status,
-            responseData
-          );
-          if (attempt === maxRetries) {
-            throw new Error(
-              `서버 오류 (${response.status}): ${
-                responseData.message || "알 수 없는 오류"
-              }`
-            );
+          if (!sessionResult.success) {
+            throw new Error(String(sessionResult.error) || "세션 생성 실패");
           }
         }
+
+        // 답안 저장
+        const currentQuestion = questions[questionNumber];
+        const weights = currentQuestion?.weights[answer];
+
+        const weightedTypes: string[] = [];
+        if (weights) {
+          Object.entries(weights).forEach(([type, weight]) => {
+            if (weight === 1) {
+              weightedTypes.push(type);
+            }
+          });
+        }
+
+        const answerData = {
+          user_id: currentUserId,
+          question_number: questionNumber,
+          answer: answer,
+          answer_value: (answer === "a" ? 1 : 2) as 1 | 2,
+          weighted_types: weightedTypes,
+        };
+
+        const answerResult = await saveTestAnswer(answerData);
+
+        if (answerResult.success) {
+          console.log("답안 저장 성공:", answerData);
+          return { success: true, userId: currentUserId };
+        } else {
+          throw new Error(String(answerResult.error) || "답안 저장 실패");
+        }
       } catch (error) {
-        console.error(
-          `진행 상황 저장 네트워크 오류 (시도 ${attempt + 1}):`,
-          error
-        );
+        console.error(`답안 저장 시도 ${attempt + 1} 실패:`, error);
         if (attempt === maxRetries) {
           throw error;
         }
@@ -85,7 +98,7 @@ export default function TestPage({
         );
       }
     }
-    return false;
+    return { success: false, userId: userId || "" };
   };
 
   const handlePrevious = () => {
@@ -116,83 +129,30 @@ export default function TestPage({
       answers: newAnswers,
     };
 
-    // 매번 답안을 서버에 저장
+    // Supabase에 직접 답안 저장
     try {
-      const { getDeviceInfo, getReferrer, getLocationInfo } = await import(
-        "@/lib/deviceDetection"
+      const result = await saveAnswerDirectly(
+        userId,
+        testState.currentQuestion,
+        answer
       );
 
-      const now = Date.now();
-      const completionTime = testState.startTime
-        ? Math.floor((now - testState.startTime) / 1000)
-        : 0;
-      const sessionTime = testState.sessionStartTime
-        ? Math.floor((now - testState.sessionStartTime) / 1000)
-        : 0;
-
-      // 디바이스 정보 수집 (첫 번째 답안에서만)
-      let deviceInfo = {};
-      let referrer = "";
-      let locationInfo = {
-        country: "unknown",
-        region: "unknown",
-        city: "unknown",
-      };
-
-      if (testState.currentQuestion === 0) {
-        deviceInfo = getDeviceInfo();
-        referrer = getReferrer();
-
-        // 위치 정보 비동기 수집 (실패해도 계속 진행)
-        try {
-          locationInfo = await getLocationInfo();
-        } catch (error) {
-          console.warn("위치 정보 수집 실패:", error);
-        }
-      }
-
-      const isLastQuestion = testState.currentQuestion === questions.length - 1;
-      const result = isLastQuestion ? calculateResult(newAnswers) : null;
-
-      const requestData = {
-        user_id: userId || undefined, // 기존 사용자 ID 전달
-        current_question: testState.currentQuestion,
-        answer: answer,
-        completion_time: completionTime,
-        session_time: sessionTime,
-        is_complete: isLastQuestion,
-
-        // 테스트 완료 시 결과 정보 추가
-        ...(isLastQuestion &&
-          result && {
-            result_type: result.personalityType.id,
-            result_name: result.personalityType.name,
-            result_type_code: result.personalityType.type, // aa, ab, bb, ba
-          }),
-
-        ...(testState.currentQuestion === 0 && {
-          referrer,
-          ...locationInfo,
-          ...deviceInfo,
-          user_agent:
-            typeof window !== "undefined" ? navigator.userAgent : "unknown",
-        }),
-      };
-
-      // 재시도 로직으로 저장 시도
-      const success = await saveProgressWithRetry(requestData);
-
-      if (!success) {
-        // 모든 재시도 실패 시 에러 처리
-        setErrorMessage(
-          "답변 저장에 실패했습니다. 네트워크 연결을 확인하고 다시 시도해주세요."
-        );
+      if (!result.success) {
+        setErrorMessage("답변 저장에 실패했습니다. 다시 시도해주세요.");
         setRetryCount((prev) => prev + 1);
         setIsProcessing(false);
-        return; // 다음 문항으로 넘어가지 않음
+        return;
       }
+
+      // 사용자 ID 업데이트
+      if (result.userId && !userId) {
+        setUserId(result.userId);
+      }
+
+      setErrorMessage("");
+      setRetryCount(0);
     } catch (error: unknown) {
-      console.error("진행 상황 저장 중 예상치 못한 오류:", error);
+      console.error("답안 저장 오류:", error);
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -200,9 +160,9 @@ export default function TestPage({
       );
       setRetryCount((prev) => prev + 1);
       setIsProcessing(false);
-      return; // 다음 문항으로 넘어가지 않음
+      return;
     } finally {
-      setIsProcessing(false); // API 요청 완료
+      setIsProcessing(false);
     }
 
     if (testState.currentQuestion < questions.length - 1) {
