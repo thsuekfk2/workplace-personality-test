@@ -43,14 +43,43 @@ export default function TestPage({
           userId ||
           `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
-        // 첫 번째 답안이면 세션 생성
+        // 첫 번째 답안이면 세션 생성 (디바이스/위치 정보 포함)
         if (!userId) {
           const { saveTestSession } = await import("@/lib/supabase");
+          
+          // 디바이스 정보 수집
+          const { getDeviceInfo, getReferrer, getLocationInfo } = await import("@/lib/deviceDetection");
+          const deviceInfo = getDeviceInfo();
+          const referrer = getReferrer();
+          
+          // 위치 정보 비동기 수집 (실패해도 계속 진행)
+          let locationInfo = {
+            country: "unknown",
+            region: "unknown", 
+            city: "unknown",
+          };
+          
+          try {
+            locationInfo = await getLocationInfo();
+          } catch (error) {
+            console.warn("위치 정보 수집 실패:", error);
+          }
+
+          // IP 주소 처리 (해싱)
+          const hashedIp = typeof window !== "undefined" && window.location 
+            ? btoa(window.location.hostname).slice(0, 10) 
+            : "unknown";
+
           const sessionResult = await saveTestSession({
             user_id: currentUserId,
             current_question: 0,
             session_time: 0,
             is_complete: false,
+            referrer,
+            ...locationInfo,
+            ...deviceInfo,
+            user_agent: typeof window !== "undefined" ? navigator.userAgent : "unknown",
+            ip_address: hashedIp,
           });
 
           if (!sessionResult.success) {
