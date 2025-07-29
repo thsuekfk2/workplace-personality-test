@@ -201,6 +201,40 @@ export default function TestPage({
     } else {
       // 마지막 질문인 경우 결과 계산 후 완료 처리
       const result = calculateResult(newAnswers);
+      
+      // 테스트 완료시 세션 업데이트
+      try {
+        const { saveTestSession } = await import("@/lib/supabase");
+        const now = Date.now();
+        const completionTime = testState.startTime
+          ? Math.floor((now - testState.startTime) / 1000)
+          : 0;
+        const sessionTime = testState.sessionStartTime
+          ? Math.floor((now - testState.sessionStartTime) / 1000)
+          : 0;
+
+        const { questions } = await import("@/lib/data");
+        
+        // userId가 없는 경우 새로 생성 (이론적으로는 있을 수 없음)
+        const currentUserId = userId || `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+        
+        await saveTestSession({
+          user_id: currentUserId,
+          current_question: questions.length - 1,
+          session_time: sessionTime,
+          is_complete: true,
+          completion_time: completionTime,
+          result_type: result.personalityType.id,
+          result_name: result.personalityType.name,
+          result_type_code: result.personalityType.type,
+        });
+
+        console.log("테스트 완료 세션 업데이트 성공");
+      } catch (error) {
+        console.error("테스트 완료 세션 업데이트 실패:", error);
+        // 완료 처리는 계속 진행
+      }
+      
       onComplete(result);
     }
   };
